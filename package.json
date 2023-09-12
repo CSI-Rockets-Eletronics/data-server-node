@@ -8,7 +8,8 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "xo --fix",
-    "*.{html,css,json,md,yml,yaml}": "prettier --write"
+    "*.{html,css,json,md,yml,yaml}": "prettier --write",
+    "prisma/schema.prisma": "prisma format"
   },
   "dependencies": {
     "@prisma/client": "^5.2.0",
