@@ -10,9 +10,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  email     String   @unique
-  name      String?
+model PathInstance {
+  environmentKey String
+  /// E.g. 'nodeName.nodeSession/nodeName2/deviceName.deviceSession'.
+  path           String
+  /// Estimate of when this path was created in the environment, to make sense
+  /// of `ts` in Record. Could be delayed by a few seconds.
+  createdAt      DateTime @default(now())
+
+  records  Record[]
+  messages Message[]
+
+  @@id([environmentKey, path])
+}
+
+model Record {
+  pathInstance   PathInstance @relation(fields: [environmentKey, path], references: [environmentKey, path])
+  environmentKey String
+  /// Source path, e.g. 'nodeName.nodeSession/nodeName2/deviceName.deviceSession'.
+  path           String
+  /// Unix micros. Relative timestamp from the device.
+  ts             BigInt
+  data           Json
+
+  @@id([environmentKey, path, ts])
+}
+
+model Message {
+  pathInstance   PathInstance @relation(fields: [environmentKey, path], references: [environmentKey, path])
+  environmentKey String
+  /// Target path, e.g. 'nodeName.nodeSession/nodeName2/deviceName.deviceSession'.
+  path           String
+  /// When *this* node received the message. Used by devices as a
+  /// pagination key for fetching new messages from this node.
+  receivedAt     DateTime     @default(now())
+  data           Json
+
+  @@id([environmentKey, path, receivedAt])
 }
