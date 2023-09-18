@@ -1,6 +1,5 @@
 import process from 'node:process';
 import {z} from 'zod';
-import 'dotenv/config.js'; // eslint-disable-line import/no-unassigned-import
 
 const envSchema = z.object({
 	PORT: z.string().transform(Number),
