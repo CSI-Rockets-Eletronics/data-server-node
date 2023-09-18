@@ -9,7 +9,7 @@ datasource db {
 
 model PathInstance {
   environmentKey String
-  /// E.g. 'nodeName.nodeSession/nodeName2/deviceName.deviceSession'.
+  /// E.g. 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'.
   path           String
   /// Estimate of when this path was created in the environment, to make sense
   /// of `ts` in Record. Could be delayed by a few seconds.
@@ -24,11 +24,12 @@ model PathInstance {
 model Record {
   pathInstance   PathInstance @relation(fields: [environmentKey, path], references: [environmentKey, path])
   environmentKey String
-  /// Source path, e.g. 'nodeName.nodeSession/nodeName2/deviceName.deviceSession'.
+  /// Source path, e.g. 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'.
   path           String
   /// Unix micros. Relative timestamp from the device.
   ts             BigInt
   data           Json
+  sentToParent   Boolean      @default(false)
 
   @@id([environmentKey, path, ts])
 }
@@ -36,7 +37,7 @@ model Record {
 model Message {
   pathInstance   PathInstance @relation(fields: [environmentKey, path], references: [environmentKey, path])
   environmentKey String
-  /// Target path, e.g. 'nodeName.nodeSession/nodeName2/deviceName.deviceSession'.
+  /// Target path, e.g. 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'.
   path           String
   /// When *this* node received the message. Used by devices as a
   /// pagination key for fetching new messages from this node.
