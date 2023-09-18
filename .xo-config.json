@@ -2,6 +2,8 @@
   "prettier": true,
   "rules": {
     "import/extensions": "off",
-    "n/file-extension-in-import": "off"
+    "n/file-extension-in-import": "off",
+    "new-cap": "off",
+    "@typescript-eslint/naming-convention": "off"
   }
 }
