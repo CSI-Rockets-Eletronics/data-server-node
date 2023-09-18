@@ -13,6 +13,7 @@
     "prisma/schema.prisma": "prisma format"
   },
   "dependencies": {
+    "@elysiajs/eden": "^0.6.5",
     "@prisma/client": "^5.2.0",
     "dotenv": "^16.3.1",
     "elysia": "^0.6.22",

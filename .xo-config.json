@@ -1,6 +1,7 @@
 {
   "prettier": true,
   "rules": {
-    "import/extensions": "off"
+    "import/extensions": "off",
+    "n/file-extension-in-import": "off"
   }
 }
