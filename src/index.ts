@@ -1,8 +1,10 @@
 import {Elysia} from 'elysia';
+import {swagger} from '@elysiajs/swagger';
 import {env} from './env';
 import {recordsRoute} from './routes/records';
 
 const app = new Elysia()
+	.use(swagger())
 	.onError(({set}) => {
 		// Don't return actual error because it may be long
 		set.status = 500;
