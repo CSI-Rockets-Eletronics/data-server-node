@@ -23,6 +23,7 @@
     "bun-types": "latest",
     "husky": "^8.0.3",
     "lint-staged": "^14.0.1",
+    "prettier": "^3.0.3",
     "prisma": "^5.2.0",
     "xo": "^0.56.0"
   },
