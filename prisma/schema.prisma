@@ -13,7 +13,7 @@ model PathInstance {
   path           String
   /// Estimate of when this path was created in the environment, to make sense
   /// of `ts` in Record. Could be delayed by a few seconds.
-  createdAt      DateTime @default(now())
+  createdAt      DateTime
 
   records  Record[]
   messages Message[]
@@ -29,7 +29,7 @@ model Record {
   /// Unix micros. Relative timestamp from the device.
   ts             BigInt
   data           Json
-  sentToParent   Boolean      @default(false)
+  sentToParent   Boolean
 
   @@id([environmentKey, path, ts])
 }
@@ -41,7 +41,7 @@ model Message {
   path           String
   /// When *this* node received the message. Used by devices as a
   /// pagination key for fetching new messages from this node.
-  receivedAt     DateTime     @default(now())
+  receivedAt     DateTime
   data           Json
 
   @@id([environmentKey, path, receivedAt])
