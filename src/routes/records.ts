@@ -24,11 +24,13 @@ export const recordsRoute = new Elysia({prefix: '/records'}).post(
 						create: {
 							environmentKey: body.environmentKey,
 							path: body.path,
+							createdAt: new Date(),
 						},
 					},
 				},
 				ts: body.ts,
 				data: body.data, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+				sentToParent: false,
 			},
 			update: {}, // Do nothing, as records are immutable
 		});
