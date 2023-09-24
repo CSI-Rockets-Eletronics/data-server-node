@@ -5,7 +5,7 @@ import {recordsRoute} from './routes/records';
 
 const app = new Elysia()
 	.use(swagger())
-	.onError(({error, code, set}) => {
+	.onError(({error, set}) => {
 		console.error(error);
 
 		// Don't return actual error because it may be long
