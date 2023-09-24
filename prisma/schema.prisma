@@ -11,8 +11,10 @@ model PathInstance {
   environmentKey String
   /// E.g. 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'.
   path           String
-  /// Estimate of when this path was created in the environment, to make sense
-  /// of `ts` in Record. Could be delayed by a few seconds.
+  /// Estimate of the real time associated with `ts=0` for a record from this
+  /// path. Determined by backward-extropolating the time associated with `ts=0`
+  /// upon encountering a message with a new path. Could be delayed by a few
+  /// seconds.
   createdAt      DateTime
 
   records  Record[]
