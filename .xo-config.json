@@ -4,6 +4,9 @@
     "import/extensions": "off",
     "n/file-extension-in-import": "off",
     "new-cap": "off",
-    "@typescript-eslint/naming-convention": "off"
+    "@typescript-eslint/naming-convention": "off",
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-call": "off"
   }
 }

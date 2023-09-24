@@ -7,13 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// Sessions associated with current node. Only populated if the node is a
+/// session maker.
+model Session {
+  environmentKey String
+  session        String
+  createdAt      DateTime
+
+  @@id([environmentKey, session])
+}
+
 model PathInstance {
   environmentKey String
   /// E.g. 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'. Always
   /// starts with the current node instance (name and possibly session), as it
-  /// is appended to all incoming records. If this node is a session maker, then
-  /// standalone node instances 'nodeName:nodeSession' track when sessions on
-  /// this node were created.
+  /// is prefixed to all incoming records.
   path           String
   /// Estimate of the real time associated with `ts=0` for a record from this
   /// path. Determined by backward-extropolating the time associated with `ts=0`
