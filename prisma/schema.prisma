@@ -9,7 +9,11 @@ datasource db {
 
 model PathInstance {
   environmentKey String
-  /// E.g. 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'.
+  /// E.g. 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'. Always
+  /// starts with the current node instance (name and possibly session), as it
+  /// is appended to all incoming records. If this node is a session maker, then
+  /// standalone node instances 'nodeName:nodeSession' track when sessions on
+  /// this node were created.
   path           String
   /// Estimate of the real time associated with `ts=0` for a record from this
   /// path. Determined by backward-extropolating the time associated with `ts=0`
