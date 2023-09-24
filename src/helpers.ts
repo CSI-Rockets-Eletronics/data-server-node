@@ -27,6 +27,8 @@ export function joinPath(...parts: string[]): string {
 	return parts.join('/');
 }
 
+/// Gets the node instance for the latest session, or creates a new session if
+/// none exists.
 export async function getOrInitCurNodeInstance(
 	environmentKey: string,
 ): Promise<string> {

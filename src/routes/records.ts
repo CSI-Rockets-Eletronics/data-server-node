@@ -101,7 +101,11 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			query: t.Object({
 				environmentKey: t.String(),
 				path: schemas.pathWithoutNodeInstance,
-				session: t.Optional(t.String()),
+				session: t.Optional(
+					t.String({
+						default: 'Current session',
+					}),
+				),
 				startTs: t.Optional(
 					t.String({
 						description:
