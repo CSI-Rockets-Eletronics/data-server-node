@@ -38,7 +38,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 						},
 					},
 					ts: body.ts,
-					data: body.data, // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+					data: body.data,
 					sentToParent: false,
 				},
 				update: {}, // Do nothing, as records are immutable
