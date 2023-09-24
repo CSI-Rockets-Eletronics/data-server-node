@@ -16,10 +16,11 @@ function generateSession(): string {
 }
 
 /**
+ * Returns a node instance from a given session, using the current node name.
  * A node instance is 'nodeName:nodeSession' for a session maker, or 'nodeName' otherwise.
  */
-function toNodeInstance(nodeName: string, nodeSession: string): string {
-	return `${nodeName}:${nodeSession}`;
+export function toNodeInstance(session: string): string {
+	return `${env.NODE_NAME}:${session}`;
 }
 
 export function joinPath(...parts: string[]): string {
@@ -39,7 +40,7 @@ export async function getOrInitCurNodeInstance(
 	});
 
 	if (curSession) {
-		return toNodeInstance(env.NODE_NAME, curSession.session);
+		return toNodeInstance(curSession.session);
 	}
 
 	const newSession = await prisma.session.create({
@@ -50,5 +51,5 @@ export async function getOrInitCurNodeInstance(
 		},
 	});
 
-	return toNodeInstance(env.NODE_NAME, newSession.session);
+	return toNodeInstance(newSession.session);
 }

@@ -1,6 +1,16 @@
+import assert from 'node:assert';
 import {Elysia, t} from 'elysia';
 import {prisma} from '../prisma';
-import {getOrInitCurNodeInstance, joinPath} from '../helpers';
+import {getOrInitCurNodeInstance, joinPath, toNodeInstance} from '../helpers';
+
+const schemas = {
+	pathWithoutNodeInstance: t.String({
+		description:
+			"Path without the current node instance ('nodeName:nodeSession/' if this node is a session maker, or 'nodeName/' otherwise).",
+	}),
+	ts: t.Integer({description: 'Microseconds since start of device session.'}),
+	data: t.Any(),
+};
 
 export const recordsRoute = new Elysia({prefix: '/records'})
 	.post(
@@ -47,34 +57,62 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 		{
 			body: t.Object({
 				environmentKey: t.String(),
-				path: t.String({
-					description:
-						"Will be prefixed with 'nodeName:nodeSession/' if this node is a session maker, or 'nodeName/' otherwise.",
-				}),
-				ts: t.Integer(),
-				data: t.Any(),
+				path: schemas.pathWithoutNodeInstance,
+				ts: schemas.ts,
+				data: schemas.data,
 			}),
 		},
 	)
 	.get(
 		'/list',
 		async ({query}) => {
-			console.log(query.startTs, query.endTs);
-			// TODO
+			const startTs =
+				query.startTs === undefined ? undefined : Number(query.startTs);
+			const endTs = query.endTs === undefined ? undefined : Number(query.endTs);
+
+			assert(!Number.isNaN(startTs), 'startTs must be a number');
+			assert(!Number.isNaN(endTs), 'endTs must be a number');
+
+			const curNodeInstance =
+				query.session === undefined
+					? await getOrInitCurNodeInstance(query.environmentKey)
+					: toNodeInstance(query.session);
+
+			const fullPath = joinPath(curNodeInstance, query.path);
+
+			const records = await prisma.record.findMany({
+				where: {
+					environmentKey: query.environmentKey,
+					path: fullPath,
+					ts: {gte: startTs, lte: endTs},
+				},
+				orderBy: {ts: startTs === undefined ? 'desc' : 'asc'},
+				take: query.take,
+			});
+
+			return {
+				records: records.map((record) => ({
+					ts: Number(record.ts),
+					data: record.data,
+				})),
+			};
 		},
 		{
 			query: t.Object({
 				environmentKey: t.String(),
-				path: t.String(),
+				path: schemas.pathWithoutNodeInstance,
+				session: t.Optional(t.String()),
 				startTs: t.Optional(
 					t.String({
-						description: 'Inclusive (+1 to get records after a known record).',
+						description:
+							'Microseconds, inclusive (add 1 to get records after a known record).',
 						default: 'Start of time',
 					}),
 				),
 				endTs: t.Optional(
 					t.String({
-						description: 'Inclusive (-1 to get records before a known record).',
+						description:
+							'Microseconds, inclusive (subtract 1 to get records before a known record).',
 						default: 'End of time',
 					}),
 				),
@@ -83,6 +121,14 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 						description:
 							'Maximum number of records to return. If `startTs` is specified, returns earliest records. Otherwise, returns latest records.',
 						default: 'Infinity',
+					}),
+				),
+			}),
+			response: t.Object({
+				records: t.Array(
+					t.Object({
+						ts: schemas.ts,
+						data: schemas.data,
 					}),
 				),
 			}),
