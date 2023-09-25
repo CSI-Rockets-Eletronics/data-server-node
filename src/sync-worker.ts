@@ -78,25 +78,27 @@ export class SyncWorker {
 			},
 		});
 
-		// TODO use batch update route
-		await Promise.all(
-			latestRecords.map(async (record) =>
-				this.parentNode.records.post({
-					environmentKey: record.environmentKey,
-					// All paths are prefixed with the current node instance
-					path: record.path,
-					ts: Number(record.ts),
-					data: record.data,
-				}),
-			),
-		);
-
 		// Set sentToParent to true for all records that were just synced
 		const minIndex = latestRecords.at(-1)?.receivedAtIndex;
 		const maxIndex = latestRecords.at(0)?.receivedAtIndex;
 
-		// If no records were synced, then the min/max index will be undefined
-		if (minIndex !== undefined && maxIndex !== undefined) {
+		const hasRecords = minIndex !== undefined && maxIndex !== undefined;
+
+		if (hasRecords) {
+			// TODO use batch update route
+			await Promise.all(
+				latestRecords.map(async (record) => {
+					const {error} = await this.parentNode.records.post({
+						environmentKey: record.environmentKey,
+						// All paths are prefixed with the current node instance
+						path: record.path,
+						ts: Number(record.ts),
+						data: record.data,
+					});
+					if (error) throw error;
+				}),
+			);
+
 			await prisma.record.updateMany({
 				where: {
 					receivedAtIndex: {gte: minIndex, lte: maxIndex},
