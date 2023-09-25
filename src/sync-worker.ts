@@ -83,6 +83,7 @@ export class SyncWorker {
 			latestRecords.map(async (record) =>
 				this.parentNode.records.post({
 					environmentKey: record.environmentKey,
+					// All paths are prefixed with the current node instance
 					path: record.path,
 					ts: Number(record.ts),
 					data: record.data,
