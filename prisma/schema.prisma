@@ -38,7 +38,7 @@ model PathInstance {
 model Record {
   /// Order in which *this* node received the record. Used by this node to
   /// determine the order in which to sync records with the parent node.
-  receivedAtIndex Int @unique @default(autoincrement())
+  receivedAtIndex Int @id @default(autoincrement())
 
   pathInstance   PathInstance @relation(fields: [environmentKey, path], references: [environmentKey, path])
   environmentKey String
@@ -49,7 +49,7 @@ model Record {
   data           Json
   sentToParent   Boolean      @default(false)
 
-  @@id([environmentKey, path, ts])
+  @@unique([environmentKey, path, ts])
 }
 
 model Message {
