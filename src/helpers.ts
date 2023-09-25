@@ -39,6 +39,7 @@ export async function getOrInitCurNodeInstance(
 	const curSession = await prisma.session.findFirst({
 		where: {environmentKey},
 		orderBy: {createdAt: 'desc'},
+		select: {session: true},
 	});
 
 	if (curSession) {
@@ -51,6 +52,7 @@ export async function getOrInitCurNodeInstance(
 			session: generateSession(),
 			createdAt: new Date(),
 		},
+		select: {session: true},
 	});
 
 	return toNodeInstance(newSession.session);

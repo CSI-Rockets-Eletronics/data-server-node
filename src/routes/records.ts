@@ -49,9 +49,9 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 					},
 					ts: body.ts,
 					data: body.data,
-					sentToParent: false,
 				},
 				update: {}, // Do nothing, as records are immutable
+				select: {},
 			});
 		},
 		{
@@ -88,6 +88,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 				},
 				orderBy: {ts: startTs === undefined ? 'desc' : 'asc'},
 				take: query.take,
+				select: {ts: true, data: true},
 			});
 
 			return {

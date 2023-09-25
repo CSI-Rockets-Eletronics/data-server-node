@@ -6,7 +6,7 @@ import {recordsRoute} from './routes/records';
 const app = new Elysia()
 	.use(swagger())
 	.onError(({error, set}) => {
-		console.error(error);
+		console.error('Error in route handler:', error);
 
 		// Don't return actual error because it may be long
 		set.status = 500;

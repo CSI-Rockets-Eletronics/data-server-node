@@ -25,7 +25,7 @@ model PathInstance {
   path           String
   /// Estimate of the real time associated with `ts=0` for a record from this
   /// path. Determined by backward-extropolating the time associated with `ts=0`
-  /// upon encountering a message with a new path. Could be delayed by a few
+  /// upon encountering a record with a new path. Could be delayed by a few
   /// seconds.
   createdAt      DateTime
 
@@ -36,6 +36,10 @@ model PathInstance {
 }
 
 model Record {
+  /// Order in which *this* node received the record. Used by this node to
+  /// determine the order in which to sync records with the parent node.
+  receivedAtIndex Int @unique @default(autoincrement())
+
   pathInstance   PathInstance @relation(fields: [environmentKey, path], references: [environmentKey, path])
   environmentKey String
   /// Source path, e.g. 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'.
@@ -43,20 +47,19 @@ model Record {
   /// Microseconds since start of device session.
   ts             BigInt
   data           Json
-  sentToParent   Boolean
+  sentToParent   Boolean      @default(false)
 
   @@id([environmentKey, path, ts])
 }
 
 model Message {
+  /// Order in which *this* node received the message. Used by devices as a
+  /// pagination key for fetching new messages from this node.
+  receivedAtIndex Int @id @default(autoincrement())
+
   pathInstance   PathInstance @relation(fields: [environmentKey, path], references: [environmentKey, path])
   environmentKey String
   /// Target path, e.g. 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'.
   path           String
-  /// When *this* node received the message. Used by devices as a
-  /// pagination key for fetching new messages from this node.
-  receivedAt     DateTime
   data           Json
-
-  @@id([environmentKey, path, receivedAt])
 }
