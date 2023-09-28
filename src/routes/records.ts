@@ -32,6 +32,9 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			});
 		},
 		{
+			detail: {
+				summary: 'Upload a single record from a given environment and path.',
+			},
 			body: t.Object({
 				environmentKey: t.String(),
 				path: schemas.pathWithoutNodeInstance,
@@ -59,6 +62,9 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			});
 		},
 		{
+			detail: {
+				summary: 'Upload multiple records from the same environment and path.',
+			},
 			body: t.Object({
 				environmentKey: t.String(),
 				path: schemas.pathWithoutNodeInstance,
@@ -109,6 +115,10 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			});
 		},
 		{
+			detail: {
+				summary:
+					'Upload records across multiple environments and paths at once.',
+			},
 			body: t.Object({
 				records: t.Array(
 					t.Object({
@@ -157,6 +167,9 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			};
 		},
 		{
+			detail: {
+				summary: 'List records from a given environment and path.',
+			},
 			query: t.Object({
 				environmentKey: t.String(),
 				path: schemas.pathWithoutNodeInstance,

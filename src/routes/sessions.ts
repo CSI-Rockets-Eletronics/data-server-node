@@ -17,6 +17,9 @@ export const sessionsRoute = new Elysia({prefix: '/sessions'}).post(
 		};
 	},
 	{
+		detail: {
+			summary: 'Start a new session for a given environment.',
+		},
 		body: t.Object({
 			environmentKey: t.String(),
 		}),

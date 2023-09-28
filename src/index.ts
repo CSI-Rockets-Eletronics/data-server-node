@@ -5,7 +5,18 @@ import {sessionsRoute} from './routes/sessions';
 import {recordsRoute} from './routes/records';
 
 const app = new Elysia()
-	.use(swagger())
+	.use(
+		swagger({
+			documentation: {
+				info: {
+					title: 'CSI Rockets Data Server Node',
+					version: '1.0.0',
+					description:
+						'API for manipulating records and messages on this data server node, which may be a part of a cluster.',
+				},
+			},
+		}),
+	)
 	.onError(({error, set}) => {
 		console.error('Error in route handler:', error);
 
