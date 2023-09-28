@@ -48,6 +48,87 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			}),
 		},
 	)
+	.post(
+		'/batch',
+		async ({body}) => {
+			const curNodeInstance = await getOrInitCurNodeInstance(
+				body.environmentKey,
+			);
+			const fullPath = joinPath(curNodeInstance, body.path);
+
+			await prisma.record.createMany({
+				data: body.records.map((record) => ({
+					environmentKey: body.environmentKey,
+					path: fullPath,
+					ts: record.ts,
+					data: record.data,
+				})),
+				skipDuplicates: true,
+			});
+		},
+		{
+			body: t.Object({
+				environmentKey: t.String(),
+				path: schemas.pathWithoutNodeInstance,
+				records: t.Array(
+					t.Object({
+						ts: schemas.ts,
+						data: schemas.data,
+					}),
+				),
+			}),
+		},
+	)
+	.post(
+		'/batchMany',
+		async ({body}) => {
+			const uniqueEnvironmentKeys = [
+				...new Set(body.records.map((r) => r.environmentKey)),
+			];
+
+			// `environmentKey` -> `curNodeInstance` for that environment
+			const curNodeInstancesMap = new Map(
+				await Promise.all(
+					uniqueEnvironmentKeys.map(
+						async (environmentKey) =>
+							[
+								environmentKey,
+								await getOrInitCurNodeInstance(environmentKey),
+							] as const,
+					),
+				),
+			);
+
+			await prisma.record.createMany({
+				data: body.records.map((record) => {
+					const curNodeInstance = curNodeInstancesMap.get(
+						record.environmentKey,
+					)!;
+					const fullPath = joinPath(curNodeInstance, record.path);
+
+					return {
+						environmentKey: record.environmentKey,
+						path: fullPath,
+						ts: record.ts,
+						data: record.data,
+					};
+				}),
+				skipDuplicates: true,
+			});
+		},
+		{
+			body: t.Object({
+				records: t.Array(
+					t.Object({
+						environmentKey: t.String(),
+						path: schemas.pathWithoutNodeInstance,
+						ts: schemas.ts,
+						data: schemas.data,
+					}),
+				),
+			}),
+		},
+	)
 	.get(
 		'/list',
 		async ({query}) => {

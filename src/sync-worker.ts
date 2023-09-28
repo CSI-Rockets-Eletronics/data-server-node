@@ -87,19 +87,14 @@ export class SyncWorker {
 		const hasRecords = minIndex !== undefined && maxIndex !== undefined;
 
 		if (hasRecords) {
-			// TODO use batch update route
-			await Promise.all(
-				latestRecords.map(async (record) => {
-					const {error} = await this.parentNode.records.post({
-						environmentKey: record.environmentKey,
-						// All paths are already prefixed with the current node instance
-						path: record.path,
-						ts: Number(record.ts),
-						data: record.data,
-					});
-					if (error) throw error;
-				}),
-			);
+			await this.parentNode.records.batchMany.post({
+				records: latestRecords.map((record) => ({
+					environmentKey: record.environmentKey,
+					path: record.path,
+					ts: Number(record.ts),
+					data: record.data,
+				})),
+			});
 
 			// Set sentToParent to true for all records that were just synced
 			await prisma.record.updateMany({
