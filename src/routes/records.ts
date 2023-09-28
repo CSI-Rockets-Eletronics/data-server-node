@@ -2,15 +2,7 @@ import assert from 'node:assert';
 import {Elysia, t} from 'elysia';
 import {prisma} from '../prisma';
 import {getOrInitCurNodeInstance, joinPath, toNodeInstance} from '../helpers';
-
-const schemas = {
-	pathWithoutNodeInstance: t.String({
-		description:
-			"Path without the current node instance ('nodeName:nodeSession/' if this node is a session maker, or 'nodeName/' otherwise).",
-	}),
-	ts: t.Integer({description: 'Unix microseconds.'}),
-	data: t.Any(),
-};
+import {schemas} from './schemas';
 
 export const recordsRoute = new Elysia({prefix: '/records'})
 	.post(
@@ -43,7 +35,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			body: t.Object({
 				environmentKey: t.String(),
 				path: schemas.pathWithoutNodeInstance,
-				ts: schemas.ts,
+				ts: schemas.unixMicros,
 				data: schemas.data,
 			}),
 		},
@@ -72,7 +64,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 				path: schemas.pathWithoutNodeInstance,
 				records: t.Array(
 					t.Object({
-						ts: schemas.ts,
+						ts: schemas.unixMicros,
 						data: schemas.data,
 					}),
 				),
@@ -122,7 +114,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 					t.Object({
 						environmentKey: t.String(),
 						path: schemas.pathWithoutNodeInstance,
-						ts: schemas.ts,
+						ts: schemas.unixMicros,
 						data: schemas.data,
 					}),
 				),
@@ -198,7 +190,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			response: t.Object({
 				records: t.Array(
 					t.Object({
-						ts: schemas.ts,
+						ts: schemas.unixMicros,
 						data: schemas.data,
 					}),
 				),

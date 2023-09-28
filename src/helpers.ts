@@ -27,6 +27,17 @@ export function joinPath(...parts: string[]): string {
 	return parts.join('/');
 }
 
+export async function createSession(environmentKey: string) {
+	return prisma.session.create({
+		data: {
+			environmentKey,
+			session: generateSession(),
+			createdAt: new Date(),
+		},
+		select: {session: true, createdAt: true},
+	});
+}
+
 /// Gets the node instance for the latest session, or creates a new session if
 /// none exists.
 export async function getOrInitCurNodeInstance(
@@ -46,14 +57,10 @@ export async function getOrInitCurNodeInstance(
 		return toNodeInstance(curSession.session);
 	}
 
-	const newSession = await prisma.session.create({
-		data: {
-			environmentKey,
-			session: generateSession(),
-			createdAt: new Date(),
-		},
-		select: {session: true},
-	});
-
+	const newSession = await createSession(environmentKey);
 	return toNodeInstance(newSession.session);
+}
+
+export function toUnixMicros(date: Date): number {
+	return date.getTime() * 1000;
 }
