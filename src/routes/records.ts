@@ -195,7 +195,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 				take: t.Optional(
 					t.Integer({
 						description:
-							'Maximum number of records to return. If `startTs` is specified, returns earliest records. Otherwise, returns latest records.',
+							'Maximum number of records to return. If `startTs` is specified, returns earliest records first. Otherwise, returns latest records first.',
 						default: 'Infinity',
 					}),
 				),
