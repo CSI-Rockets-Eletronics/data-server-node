@@ -12,54 +12,47 @@ datasource db {
 model Session {
   environmentKey String
   session        String
+  /// Just to help identify sessions during analysis.
   createdAt      DateTime
 
   @@id([environmentKey, session])
 }
 
-model PathInstance {
-  environmentKey String
-  /// E.g. 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'. Always
-  /// starts with the current node instance (name and possibly session), as it
-  /// is prefixed to all incoming records.
-  path           String
-  /// Estimate of the real time associated with `ts=0` for a record from this
-  /// path. Determined by backward-extropolating the time associated with `ts=0`
-  /// upon encountering a record with a new path. Could be delayed by a few
-  /// seconds.
-  createdAt      DateTime
-
-  records  Record[]
-  messages Message[]
-
-  @@id([environmentKey, path])
-}
-
 model Record {
-  /// Order in which *this* node received the record. Used by this node to
-  /// determine the order in which to sync records with the parent node.
-  receivedAtIndex Int @id @default(autoincrement())
-
-  pathInstance   PathInstance @relation(fields: [environmentKey, path], references: [environmentKey, path])
   environmentKey String
-  /// Source path, e.g. 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'.
+  /// Source path, e.g.
+  /// 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'. Always starts
+  /// with the current node instance (name and possibly session), as it is
+  /// prefixed to all incoming records.
   path           String
-  /// Microseconds since start of device session.
+  /// Unix microseconds, as recorded by the device (whose clock *should* be
+  /// roughly synced). Each new message from the same device *should* have an
+  /// increasing `ts`, so `ts` can be used for pagination even as new messages
+  /// arrive (when scoped to a path).
   ts             BigInt
   data           Json
-  sentToParent   Boolean      @default(false)
 
-  @@unique([environmentKey, path, ts])
+  /// Metadata for syncing with the parent node.
+  receivedAtIndex Int     @default(autoincrement())
+  /// Metadata for syncing with the parent node.
+  sentToParent    Boolean @default(false)
+
+  @@id([environmentKey, path, ts])
 }
 
 model Message {
-  /// Order in which *this* node received the message. Used by devices as a
-  /// pagination key for fetching new messages from this node.
-  receivedAtIndex Int @id @default(autoincrement())
-
-  pathInstance   PathInstance @relation(fields: [environmentKey, path], references: [environmentKey, path])
   environmentKey String
-  /// Target path, e.g. 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'.
+  /// Target path, e.g.
+  /// 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'. Always starts
+  /// with the current node instance (name and possibly session), as it is
+  /// prefixed to all incoming records.
   path           String
+  /// Unix microseconds, as recorded by the current node. Represents when the
+  /// current node received the message. Guaranteed that each new message will
+  /// have an increasing `ts`, so `ts` can be used for pagination even as new
+  /// messages arrive (when scoped to a path).
+  ts             BigInt
   data           Json
+
+  @@id([environmentKey, path, ts])
 }

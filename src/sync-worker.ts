@@ -34,11 +34,12 @@ export class SyncWorker {
 			try {
 				// eslint-disable-next-line no-await-in-loop
 				await this.syncRecords();
-				// eslint-disable-next-line no-await-in-loop
-				await Bun.sleep(SYNC_RECORDS_DELAY_MS);
 			} catch (error) {
 				console.error('Error in SyncWorker.syncRecords():', error);
 			}
+
+			// eslint-disable-next-line no-await-in-loop
+			await Bun.sleep(SYNC_RECORDS_DELAY_MS);
 		}
 	}
 
@@ -48,11 +49,12 @@ export class SyncWorker {
 			try {
 				// eslint-disable-next-line no-await-in-loop
 				await this.syncMessages();
-				// eslint-disable-next-line no-await-in-loop
-				await Bun.sleep(SYNC_MESSAGES_DELAY_MS);
 			} catch (error) {
 				console.error('Error in SyncWorker.syncMessages():', error);
 			}
+
+			// eslint-disable-next-line no-await-in-loop
+			await Bun.sleep(SYNC_MESSAGES_DELAY_MS);
 		}
 	}
 
@@ -68,6 +70,7 @@ export class SyncWorker {
 			take: liveSync
 				? LIVE_SYNC_RECORD_BATCH_SIZE
 				: OFFLINE_SYNC_RECORD_BATCH_SIZE,
+			// Always sync latest first, whether live or offline
 			orderBy: {receivedAtIndex: 'desc'},
 			select: {
 				receivedAtIndex: true,
@@ -78,7 +81,6 @@ export class SyncWorker {
 			},
 		});
 
-		// Set sentToParent to true for all records that were just synced
 		const minIndex = latestRecords.at(-1)?.receivedAtIndex;
 		const maxIndex = latestRecords.at(0)?.receivedAtIndex;
 
@@ -90,7 +92,7 @@ export class SyncWorker {
 				latestRecords.map(async (record) => {
 					const {error} = await this.parentNode.records.post({
 						environmentKey: record.environmentKey,
-						// All paths are prefixed with the current node instance
+						// All paths are already prefixed with the current node instance
 						path: record.path,
 						ts: Number(record.ts),
 						data: record.data,
@@ -99,10 +101,13 @@ export class SyncWorker {
 				}),
 			);
 
+			// Set sentToParent to true for all records that were just synced
 			await prisma.record.updateMany({
 				where: {
 					receivedAtIndex: {gte: minIndex, lte: maxIndex},
-					sentToParent: false, // Skip already synced records also in the range
+					// Could be very many records in range, but the # of un-synced records
+					// is capped by how many records we fetch above
+					sentToParent: false,
 				},
 				data: {sentToParent: true},
 			});

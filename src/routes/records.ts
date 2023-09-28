@@ -8,7 +8,7 @@ const schemas = {
 		description:
 			"Path without the current node instance ('nodeName:nodeSession/' if this node is a session maker, or 'nodeName/' otherwise).",
 	}),
-	ts: t.Integer({description: 'Microseconds since start of device session.'}),
+	ts: t.Integer({description: 'Unix microseconds.'}),
 	data: t.Any(),
 };
 
@@ -19,9 +19,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			const curNodeInstance = await getOrInitCurNodeInstance(
 				body.environmentKey,
 			);
-
 			const fullPath = joinPath(curNodeInstance, body.path);
-			const pathCreatedAtMs = Date.now() - body.ts / 1000;
 
 			await prisma.record.upsert({
 				where: {
@@ -32,21 +30,8 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 					},
 				},
 				create: {
-					pathInstance: {
-						connectOrCreate: {
-							where: {
-								environmentKey_path: {
-									environmentKey: body.environmentKey,
-									path: fullPath,
-								},
-							},
-							create: {
-								environmentKey: body.environmentKey,
-								path: fullPath,
-								createdAt: new Date(pathCreatedAtMs),
-							},
-						},
-					},
+					environmentKey: body.environmentKey,
+					path: fullPath,
 					ts: body.ts,
 					data: body.data,
 				},
@@ -110,14 +95,14 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 				startTs: t.Optional(
 					t.String({
 						description:
-							'Microseconds, inclusive (add 1 to get records after a known record).',
+							'Unix microseconds, inclusive (add 1 to get records after a known record).',
 						default: 'Start of time',
 					}),
 				),
 				endTs: t.Optional(
 					t.String({
 						description:
-							'Microseconds, inclusive (subtract 1 to get records before a known record).',
+							'Unix microseconds, inclusive (subtract 1 to get records before a known record).',
 						default: 'End of time',
 					}),
 				),
