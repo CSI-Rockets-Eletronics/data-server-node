@@ -8,9 +8,10 @@ const app = new Elysia()
 	.onError(({error, set}) => {
 		console.error('Error in route handler:', error);
 
-		// Don't return actual error because it may be long
 		set.status = 500;
-		return 'ERROR';
+		return {
+			error: `${error.name}: ${error.message}`,
+		};
 	})
 	.use(recordsRoute)
 	.listen(env.PORT);
