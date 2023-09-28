@@ -10,7 +10,7 @@ const app = new Elysia()
 			documentation: {
 				info: {
 					title: 'CSI Rockets Data Server Node',
-					version: '1.0.0',
+					version: '0.0.1',
 					description:
 						'API for manipulating records and messages on this data server node, which may be a part of a cluster.',
 				},
