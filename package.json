@@ -5,7 +5,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
     "prepare": "husky install",
-    "lint": "xo"
+    "lint": "xo",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:generate": "prisma generate",
+    "prisma:studio": "prisma studio"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "xo --fix",
