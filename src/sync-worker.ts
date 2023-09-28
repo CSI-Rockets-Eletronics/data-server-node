@@ -87,7 +87,7 @@ export class SyncWorker {
 		const hasRecords = minIndex !== undefined && maxIndex !== undefined;
 
 		if (hasRecords) {
-			await this.parentNode.records.batchMany.post({
+			const {error} = await this.parentNode.records.batchMany.post({
 				records: latestRecords.map((record) => ({
 					environmentKey: record.environmentKey,
 					path: record.path,
@@ -95,6 +95,8 @@ export class SyncWorker {
 					data: record.data,
 				})),
 			});
+
+			if (error) throw error;
 
 			// Set sentToParent to true for all records that were just synced
 			await prisma.record.updateMany({
