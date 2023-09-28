@@ -32,7 +32,7 @@ export async function createSession(environmentKey: string) {
 		data: {
 			environmentKey,
 			session: generateSession(),
-			createdAt: new Date(),
+			createdAt: toUnixMicros(new Date()),
 		},
 		select: {session: true, createdAt: true},
 	});

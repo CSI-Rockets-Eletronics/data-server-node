@@ -1,6 +1,6 @@
 import {Elysia, t} from 'elysia';
 import {env} from '../env';
-import {createSession, toUnixMicros} from '../helpers';
+import {createSession} from '../helpers';
 import {schemas} from './schemas';
 
 export const sessionsRoute = new Elysia({prefix: '/sessions'}).post(
@@ -13,7 +13,7 @@ export const sessionsRoute = new Elysia({prefix: '/sessions'}).post(
 		const session = await createSession(body.environmentKey);
 		return {
 			session: session.session,
-			createdAt: toUnixMicros(session.createdAt),
+			createdAt: Number(session.createdAt),
 		};
 	},
 	{

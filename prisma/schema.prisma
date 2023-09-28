@@ -12,8 +12,9 @@ datasource db {
 model Session {
   environmentKey String
   session        String
-  /// Just to help identify sessions during analysis.
-  createdAt      DateTime
+  /// As recorded by the current node. Just to help identify sessions during
+  /// analysis.
+  createdAt      BigInt
 
   @@id([environmentKey, session])
 }
