@@ -130,7 +130,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 		},
 	)
 	.get(
-		'/list',
+		'',
 		async ({query}) => {
 			const startTs =
 				query.startTs === undefined ? undefined : Number(query.startTs);
