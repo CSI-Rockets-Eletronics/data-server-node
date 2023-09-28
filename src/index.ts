@@ -1,6 +1,7 @@
 import {Elysia} from 'elysia';
 import {swagger} from '@elysiajs/swagger';
 import {env} from './env';
+import {sessionsRoute} from './routes/sessions';
 import {recordsRoute} from './routes/records';
 
 const app = new Elysia()
@@ -13,6 +14,7 @@ const app = new Elysia()
 			error: `${error.name}: ${error.message}`,
 		};
 	})
+	.use(sessionsRoute)
 	.use(recordsRoute)
 	.listen(env.PORT);
 
