@@ -147,11 +147,12 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 					: toNodeInstance(query.session);
 
 			const fullPath = joinPath(curNodeInstance, query.path);
+			const matchPrefix = fullPath.endsWith('/');
 
 			const records = await prisma.record.findMany({
 				where: {
 					environmentKey: query.environmentKey,
-					path: fullPath,
+					path: matchPrefix ? {startsWith: fullPath} : {equals: fullPath},
 					ts: {gte: startTs, lte: endTs},
 				},
 				orderBy: {ts: startTs === undefined ? 'desc' : 'asc'},
@@ -172,7 +173,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			},
 			query: t.Object({
 				environmentKey: t.String(),
-				path: schemas.pathWithoutNodeInstance,
+				path: schemas.pathPrefixWithoutNodeInstance,
 				session: t.Optional(
 					t.String({
 						default: 'Current session',
