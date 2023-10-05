@@ -68,7 +68,8 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 		},
 		{
 			detail: {
-				summary: 'Upload multiple records from the same environment and path.',
+				summary:
+					'Upload multiple records from the same environment and path. If this node is a session maker, uploads to the current session.',
 			},
 			body: t.Object({
 				environmentKey: t.String(),
@@ -124,7 +125,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 		{
 			detail: {
 				summary:
-					'Upload records across multiple environments and paths at once.',
+					'Upload records across multiple environments and paths at once.  If this node is a session maker, uploads to the current session.',
 			},
 			body: t.Object({
 				records: t.Array(
