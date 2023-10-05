@@ -51,9 +51,7 @@ model Message {
   /// Unix microseconds, as recorded by the current node. Represents when the
   /// current node received the message. Guaranteed that each new message will
   /// have an increasing `ts`, so `ts` can be used for pagination even as new
-  /// messages arrive (when scoped to a path).
-  ts             BigInt
+  /// messages arrive.
+  ts             BigInt @id
   data           Json
-
-  @@id([environmentKey, path, ts])
 }
