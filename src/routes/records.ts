@@ -2,6 +2,7 @@ import assert from 'node:assert';
 import {Elysia, t} from 'elysia';
 import {prisma} from '../prisma';
 import {getOrInitCurNodeInstance, joinPath, toNodeInstance} from '../helpers';
+import {maybeSyncWorker} from '../sync-worker';
 import {schemas} from './schemas';
 
 export const recordsRoute = new Elysia({prefix: '/records'})
@@ -30,6 +31,8 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 				update: {}, // Do nothing, as records are immutable
 				select: {},
 			});
+
+			maybeSyncWorker?.onReceiveRecord();
 		},
 		{
 			detail: {
@@ -60,6 +63,8 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 				})),
 				skipDuplicates: true,
 			});
+
+			maybeSyncWorker?.onReceiveRecord();
 		},
 		{
 			detail: {
@@ -113,6 +118,8 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 				}),
 				skipDuplicates: true,
 			});
+
+			maybeSyncWorker?.onReceiveRecord();
 		},
 		{
 			detail: {

@@ -1,4 +1,4 @@
-import {type ParentNode} from './parent-node';
+import {maybeParentNode, type ParentNode} from './parent-node';
 import {prisma} from './prisma';
 
 const SYNC_RECORDS_DELAY_MS = 200;
@@ -16,7 +16,7 @@ const OFFLINE_SYNC_RECORD_BATCH_SIZE = 1000;
 
 export class SyncWorker {
 	// Return value of Date.now()
-	private latestMessageReceivedAt: number | undefined;
+	private latestRecordReceivedAt: number | undefined;
 
 	constructor(private readonly parentNode: ParentNode) {}
 
@@ -24,8 +24,8 @@ export class SyncWorker {
 		await Promise.all([this.syncRecordsLoop(), this.syncMessagesLoop()]);
 	}
 
-	async onReceiveMessage() {
-		this.latestMessageReceivedAt = Date.now();
+	onReceiveRecord() {
+		this.latestRecordReceivedAt = Date.now();
 	}
 
 	private async syncRecordsLoop() {
@@ -120,11 +120,15 @@ export class SyncWorker {
 	}
 
 	private async shouldLiveSyncRecords(): Promise<boolean> {
-		if (this.latestMessageReceivedAt === undefined) {
+		if (this.latestRecordReceivedAt === undefined) {
 			return false;
 		}
 
-		const diff = Date.now() - this.latestMessageReceivedAt;
+		const diff = Date.now() - this.latestRecordReceivedAt;
 		return diff < LIVE_THRESHOLD_SECS * 1000;
 	}
 }
+
+export const maybeSyncWorker = maybeParentNode
+	? new SyncWorker(maybeParentNode)
+	: undefined;
