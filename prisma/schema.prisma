@@ -46,7 +46,7 @@ model Message {
   /// Target path, e.g.
   /// 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'. Always starts
   /// with the current node instance (name and possibly session), as it is
-  /// prefixed to all incoming records.
+  /// prefixed to all incoming messages.
   path           String
   /// Unix microseconds, as recorded by the current node. Represents when the
   /// current node received the message. Guaranteed that each new message will
