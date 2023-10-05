@@ -10,7 +10,7 @@ const app = new Elysia()
 		swagger({
 			documentation: {
 				info: {
-					title: 'CSI Rockets Data Server Node',
+					title: `CSI Rockets Data Server: Node "${env.NODE_NAME}"`,
 					version: '0.0.1',
 					description:
 						'API for manipulating records and messages on this data server node, which may be a part of a cluster.',
