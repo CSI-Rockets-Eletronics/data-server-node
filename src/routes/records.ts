@@ -78,7 +78,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 		},
 	)
 	.post(
-		'/batchMany',
+		'/batchGlobal',
 		async ({body}) => {
 			const uniqueEnvironmentKeys = [
 				...new Set(body.records.map((r) => r.environmentKey)),

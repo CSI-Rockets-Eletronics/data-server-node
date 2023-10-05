@@ -87,7 +87,7 @@ export class SyncWorker {
 		const hasRecords = minIndex !== undefined && maxIndex !== undefined;
 
 		if (hasRecords) {
-			const {error} = await this.parentNode.records.batchMany.post({
+			const {error} = await this.parentNode.records.batchGlobal.post({
 				records: latestRecords.map((record) => ({
 					environmentKey: record.environmentKey,
 					path: record.path,
