@@ -152,7 +152,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			const records = await prisma.record.findMany({
 				where: {
 					environmentKey: query.environmentKey,
-					path: matchPrefix ? {startsWith: fullPath} : {equals: fullPath},
+					path: matchPrefix ? {startsWith: fullPath} : fullPath,
 					ts: {gte: startTs, lte: endTs},
 				},
 				orderBy: {ts: startTs === undefined ? 'desc' : 'asc'},

@@ -3,6 +3,7 @@ import {swagger} from '@elysiajs/swagger';
 import {env} from './env';
 import {sessionsRoute} from './routes/sessions';
 import {recordsRoute} from './routes/records';
+import {messagesRoute} from './routes/messages';
 
 const app = new Elysia()
 	.use(
@@ -27,6 +28,7 @@ const app = new Elysia()
 	})
 	.use(sessionsRoute)
 	.use(recordsRoute)
+	.use(messagesRoute)
 	.listen(env.PORT);
 
 export type App = typeof app;
