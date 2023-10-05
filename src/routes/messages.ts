@@ -2,11 +2,11 @@ import assert from 'node:assert';
 import {Elysia, t} from 'elysia';
 import {prisma} from '../prisma';
 import {
+	curTimeMicros,
 	getOrInitCurNodeInstance,
 	joinPath,
 	splitPath,
 	toNodeInstance,
-	toUnixMicros,
 } from '../helpers';
 import {schemas} from './schemas';
 
@@ -24,7 +24,7 @@ export async function createMessage(message: {
 		data: {
 			environmentKey: message.environmentKey,
 			path: fullPath,
-			ts: toUnixMicros(new Date()),
+			ts: curTimeMicros(),
 			data: message.data,
 		},
 		select: {},

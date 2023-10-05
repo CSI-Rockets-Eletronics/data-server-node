@@ -12,8 +12,8 @@ datasource db {
 model Session {
   environmentKey String
   session        String
-  /// As recorded by the current node. Just to help identify sessions during
-  /// analysis.
+  /// Unix microseconds, as recorded by the current node. Just to help identify
+  /// sessions during analysis.
   createdAt      BigInt
 
   @@id([environmentKey, session])

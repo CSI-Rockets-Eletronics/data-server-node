@@ -1,4 +1,4 @@
-import {toUnixMicros} from './helpers';
+import {curTimeMicros} from './helpers';
 import {maybeParentNode, type ParentNode} from './parent-node';
 import {prisma} from './prisma';
 import {createMessage} from './routes/messages';
@@ -17,11 +17,11 @@ const LIVE_SYNC_RECORD_BATCH_SIZE = 100;
 const OFFLINE_SYNC_RECORD_BATCH_SIZE = 1000;
 
 export class SyncWorker {
-	// Return value of Date.now()
+	// Milliseconds. Return value of Date.now().
 	private latestRecordReceivedAt: number | undefined;
 
-	// Unix microseconds
-	private lastSyncedMessageTs = toUnixMicros(new Date());
+	// Unix microseconds.
+	private lastSyncedMessageTs = curTimeMicros();
 
 	constructor(private readonly parentNode: ParentNode) {}
 

@@ -36,7 +36,7 @@ export async function createSession(environmentKey: string) {
 		data: {
 			environmentKey,
 			session: generateSession(),
-			createdAt: toUnixMicros(new Date()),
+			createdAt: curTimeMicros(),
 		},
 		select: {session: true, createdAt: true},
 	});
@@ -65,6 +65,7 @@ export async function getOrInitCurNodeInstance(
 	return toNodeInstance(newSession.session);
 }
 
-export function toUnixMicros(date: Date): number {
-	return date.getTime() * 1000;
+export function curTimeMicros(): number {
+	const milliseconds = performance.now() + performance.timeOrigin;
+	return Math.round(milliseconds * 1000);
 }
