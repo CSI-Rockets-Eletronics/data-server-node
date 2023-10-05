@@ -132,3 +132,8 @@ export class SyncWorker {
 export const maybeSyncWorker = maybeParentNode
 	? new SyncWorker(maybeParentNode)
 	: undefined;
+
+if (maybeSyncWorker) {
+	void maybeSyncWorker.run();
+	console.log('🔄 Started sync worker');
+}
