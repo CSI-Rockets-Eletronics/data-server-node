@@ -29,7 +29,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 					data: body.data,
 				},
 				update: {}, // Do nothing, as records are immutable
-				select: {},
+				select: {ts: true},
 			});
 
 			maybeSyncWorker?.onReceiveRecord();

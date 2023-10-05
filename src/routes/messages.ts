@@ -27,7 +27,7 @@ export async function createMessage(message: {
 			ts: curTimeMicros(),
 			data: message.data,
 		},
-		select: {},
+		select: {ts: true},
 	});
 }
 
