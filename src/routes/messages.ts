@@ -4,29 +4,38 @@ import {prisma} from '../prisma';
 import {
 	getOrInitCurNodeInstance,
 	joinPath,
+	splitPath,
 	toNodeInstance,
 	toUnixMicros,
 } from '../helpers';
 import {schemas} from './schemas';
 
+export async function createMessage(message: {
+	environmentKey: string;
+	path: string;
+	data: any;
+}) {
+	const curNodeInstance = await getOrInitCurNodeInstance(
+		message.environmentKey,
+	);
+	const fullPath = joinPath(curNodeInstance, message.path);
+
+	await prisma.message.create({
+		data: {
+			environmentKey: message.environmentKey,
+			path: fullPath,
+			ts: toUnixMicros(new Date()),
+			data: message.data,
+		},
+		select: {},
+	});
+}
+
 export const messagesRoute = new Elysia({prefix: '/messages'})
 	.post(
 		'',
 		async ({body}) => {
-			const curNodeInstance = await getOrInitCurNodeInstance(
-				body.environmentKey,
-			);
-			const fullPath = joinPath(curNodeInstance, body.path);
-
-			await prisma.message.create({
-				data: {
-					environmentKey: body.environmentKey,
-					path: fullPath,
-					ts: toUnixMicros(new Date()),
-					data: body.data,
-				},
-				select: {},
-			});
+			await createMessage(body);
 		},
 		{
 			detail: {
@@ -97,6 +106,62 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 			}),
 			response: t.Union([
 				t.Object({
+					ts: schemas.unixMicros,
+					data: schemas.data,
+				}),
+				t.Null(),
+			]),
+		},
+	)
+	.get(
+		'/nextGlobal',
+		async ({query}) => {
+			const afterTs =
+				query.afterTs === undefined ? undefined : Number(query.afterTs);
+
+			assert(!Number.isNaN(afterTs), 'afterTs must be a number');
+
+			const message = await prisma.message.findFirst({
+				where: {
+					ts: {gt: afterTs},
+				},
+				orderBy: {ts: 'asc'},
+				select: {environmentKey: true, path: true, ts: true, data: true},
+			});
+
+			if (!message) {
+				return null;
+			}
+
+			const pathWithoutNodeInstance = joinPath(
+				...splitPath(message.path).slice(1),
+			);
+
+			return {
+				environmentKey: message.environmentKey,
+				path: pathWithoutNodeInstance,
+				ts: Number(message.ts),
+				data: message.data,
+			};
+		},
+		{
+			detail: {
+				summary:
+					'List the next message across all environments, sessions, and paths after a given `ts`.',
+			},
+			query: t.Object({
+				afterTs: t.Optional(
+					t.String({
+						description:
+							'Unix microseconds, exclusive. E.g. the exact `ts` of the last message received.',
+						default: 'Start of time',
+					}),
+				),
+			}),
+			response: t.Union([
+				t.Object({
+					environmentKey: t.String(),
+					path: schemas.pathPrefixWithoutNodeInstance,
 					ts: schemas.unixMicros,
 					data: schemas.data,
 				}),

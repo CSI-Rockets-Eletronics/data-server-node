@@ -27,6 +27,10 @@ export function joinPath(...parts: string[]): string {
 	return parts.join('/');
 }
 
+export function splitPath(path: string): string[] {
+	return path.split('/');
+}
+
 export async function createSession(environmentKey: string) {
 	return prisma.session.create({
 		data: {

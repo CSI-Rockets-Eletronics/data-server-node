@@ -1,5 +1,7 @@
+import {toUnixMicros} from './helpers';
 import {maybeParentNode, type ParentNode} from './parent-node';
 import {prisma} from './prisma';
+import {createMessage} from './routes/messages';
 
 const SYNC_RECORDS_DELAY_MS = 200;
 const SYNC_MESSAGES_DELAY_MS = 200;
@@ -17,6 +19,9 @@ const OFFLINE_SYNC_RECORD_BATCH_SIZE = 1000;
 export class SyncWorker {
 	// Return value of Date.now()
 	private latestRecordReceivedAt: number | undefined;
+
+	// Unix microseconds
+	private lastSyncedMessageTs = toUnixMicros(new Date());
 
 	constructor(private readonly parentNode: ParentNode) {}
 
@@ -116,7 +121,23 @@ export class SyncWorker {
 	 * responses.
 	 */
 	private async syncMessages() {
-		// TODO
+		const {data: nextMessage, error} =
+			await this.parentNode.messages.nextGlobal.get({
+				$query: {
+					afterTs: String(this.lastSyncedMessageTs),
+				},
+			});
+
+		if (error) throw error;
+
+		if (nextMessage) {
+			await createMessage({
+				environmentKey: nextMessage.environmentKey,
+				path: nextMessage.path,
+				data: nextMessage.data,
+			});
+			this.lastSyncedMessageTs = nextMessage.ts;
+		}
 	}
 
 	private async shouldLiveSyncRecords(): Promise<boolean> {
