@@ -5,9 +5,9 @@ services:
     depends_on:
       - postgres
     environment:
+      - DATABASE_URL=postgres://user:pass@postgres:5432/db
       - NODE_NAME
       - IS_SESSION_MAKER
-      - DATABASE_URL=postgres://user:pass@postgres:5432/db
       - PARENT_NODE_URL
     ports:
       - ${PORT}:3000
