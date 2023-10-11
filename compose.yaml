@@ -1,0 +1,26 @@
+services:
+  app:
+    restart: always
+    build: .
+    depends_on:
+      - postgres
+    environment:
+      - NODE_NAME
+      - IS_SESSION_MAKER
+      - DATABASE_URL=postgres://user:pass@postgres:5432/db
+      - PARENT_NODE_URL
+    ports:
+      - ${PORT}:3000
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: db
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+volumes:
+  postgres:
