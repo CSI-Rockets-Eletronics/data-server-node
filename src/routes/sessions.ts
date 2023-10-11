@@ -78,15 +78,13 @@ export const sessionsRoute = new Elysia({prefix: '/sessions'})
 				createdAfter: t.Optional(
 					t.String({
 						description:
-							'Unix microseconds, inclusive (add 1 to get sessions after a known session).',
-						default: 'Start of time',
+							'Unix microseconds, inclusive (add 1 to get sessions after a known session). Defaults to the start of time.',
 					}),
 				),
 				createdBefore: t.Optional(
 					t.String({
 						description:
-							'Unix microseconds, inclusive (subtract 1 to get sessions before a known session).',
-						default: 'End of time',
+							'Unix microseconds, inclusive (subtract 1 to get sessions before a known session). Defaults to the end of time.',
 					}),
 				),
 			}),

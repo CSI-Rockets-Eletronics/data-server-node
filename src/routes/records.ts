@@ -184,28 +184,25 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 				path: schemas.pathPrefixWithoutNodeInstance,
 				session: t.Optional(
 					t.String({
-						default: 'Current session',
+						description: 'Defaults to the current session.',
 					}),
 				),
 				startTs: t.Optional(
 					t.String({
 						description:
-							'Unix microseconds, inclusive (add 1 to get records after a known record).',
-						default: 'Start of time',
+							'Unix microseconds, inclusive (add 1 to get records after a known record). Defaults to the start of time.',
 					}),
 				),
 				endTs: t.Optional(
 					t.String({
 						description:
-							'Unix microseconds, inclusive (subtract 1 to get records before a known record).',
-						default: 'End of time',
+							'Unix microseconds, inclusive (subtract 1 to get records before a known record). Defaults to the end of time.',
 					}),
 				),
 				take: t.Optional(
 					t.Integer({
 						description:
-							'Maximum number of records to return. If `startTs` is specified, returns earliest records first. Otherwise, returns latest records first.',
-						default: 'Infinity',
+							'Maximum number of records to return. If `startTs` is specified, returns earliest records first. Otherwise, returns latest records first. Defaults to infinity.',
 					}),
 				),
 			}),

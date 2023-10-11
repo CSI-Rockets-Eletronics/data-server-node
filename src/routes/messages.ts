@@ -93,14 +93,13 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 				path: schemas.pathPrefixWithoutNodeInstance,
 				session: t.Optional(
 					t.String({
-						default: 'Current session',
+						description: 'Defaults to the current session.',
 					}),
 				),
 				afterTs: t.Optional(
 					t.String({
 						description:
-							'Unix microseconds, exclusive. E.g. the exact `ts` of the last message received.',
-						default: 'Start of time',
+							'Unix microseconds, exclusive. E.g. the exact `ts` of the last message received. Defaults to the start of time.',
 					}),
 				),
 			}),
@@ -153,8 +152,7 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 				afterTs: t.Optional(
 					t.String({
 						description:
-							'Unix microseconds, exclusive. E.g. the exact `ts` of the last message received.',
-						default: 'Start of time',
+							'Unix microseconds, exclusive. E.g. the exact `ts` of the last message received. Defaults to the start of time.',
 					}),
 				),
 			}),
