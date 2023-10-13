@@ -18,6 +18,9 @@ const app = new Elysia()
 			},
 		}),
 	)
+	.get('/redirect', ({set}) => {
+		set.redirect = '/swagger';
+	})
 	.onError(({error, set}) => {
 		console.error('Error in route handler:', error);
 
