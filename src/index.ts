@@ -18,7 +18,7 @@ const app = new Elysia()
 			},
 		}),
 	)
-	.get('/redirect', ({set}) => {
+	.get('/', ({set}) => {
 		set.redirect = '/swagger';
 	})
 	.onError(({error, set}) => {
