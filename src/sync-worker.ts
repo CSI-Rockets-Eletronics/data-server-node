@@ -72,11 +72,11 @@ export class SyncWorker {
 
 		const latestRecords = await prisma.record.findMany({
 			where: {sentToParent: false},
+			// Always sync latest first, whether live or offline
+			orderBy: {receivedAtIndex: 'desc'},
 			take: liveSync
 				? LIVE_SYNC_RECORD_BATCH_SIZE
 				: OFFLINE_SYNC_RECORD_BATCH_SIZE,
-			// Always sync latest first, whether live or offline
-			orderBy: {receivedAtIndex: 'desc'},
 			select: {
 				receivedAtIndex: true,
 				environmentKey: true,
@@ -106,10 +106,10 @@ export class SyncWorker {
 			// Set sentToParent to true for all records that were just synced
 			await prisma.record.updateMany({
 				where: {
-					receivedAtIndex: {gte: minIndex, lte: maxIndex},
 					// Could be very many records in range, but the # of un-synced records
 					// is capped by how many records we fetch above
 					sentToParent: false,
+					receivedAtIndex: {gte: minIndex, lte: maxIndex},
 				},
 				data: {sentToParent: true},
 			});

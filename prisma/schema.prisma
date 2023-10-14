@@ -35,11 +35,12 @@ model Record {
   data           Json
 
   /// Metadata for syncing with the parent node.
-  receivedAtIndex Int     @default(autoincrement())
-  /// Metadata for syncing with the parent node.
   sentToParent    Boolean @default(false)
+  /// Metadata for syncing with the parent node.
+  receivedAtIndex Int     @default(autoincrement())
 
   @@id([environmentKey, path, ts])
+  @@index([sentToParent, receivedAtIndex])
 }
 
 model Message {
