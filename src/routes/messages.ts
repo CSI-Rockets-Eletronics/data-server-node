@@ -75,7 +75,7 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 			});
 
 			if (!message) {
-				return null;
+				return 'NONE';
 			}
 
 			return {
@@ -108,7 +108,7 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 					ts: schemas.unixMicros,
 					data: schemas.data,
 				}),
-				t.Null(),
+				t.Literal('NONE'), // Elysia doesn't like returning null
 			]),
 		},
 	)
@@ -129,7 +129,7 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 			});
 
 			if (!message) {
-				return null;
+				return 'NONE';
 			}
 
 			const pathWithoutNodeInstance = joinPath(
@@ -163,7 +163,7 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 					ts: schemas.unixMicros,
 					data: schemas.data,
 				}),
-				t.Null(),
+				t.Literal('NONE'), // Elysia doesn't like returning null
 			]),
 		},
 	);
