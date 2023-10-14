@@ -1,9 +1,7 @@
 import {describe, expect, test} from 'bun:test';
 import {testNode} from '../test-node';
 import {catchError} from '../helpers';
-import {environmentKey, setupCorrectnessTests} from './setup';
-
-setupCorrectnessTests();
+import {environmentKey} from '../setup';
 
 describe('/records', () => {
 	test('upload and get', async () => {
