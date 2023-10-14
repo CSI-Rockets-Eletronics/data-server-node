@@ -3,6 +3,12 @@ import {testNode} from '../test-node';
 import {catchError} from '../helpers';
 import {environmentKey} from '../setup';
 
+type Message = Exclude<
+	Awaited<ReturnType<typeof testNode.messages.next.get>>['data'],
+	// eslint-disable-next-line @typescript-eslint/ban-types
+	null | 'NONE'
+>;
+
 describe('/messages', () => {
 	test('upload and get next', async () => {
 		const initial = await catchError(
@@ -20,7 +26,7 @@ describe('/messages', () => {
 
 		const message1 = (await catchError(
 			testNode.messages.next.get({$query: {environmentKey, path: 'foo'}}),
-		)) as any;
+		)) as Message;
 		expect(message1.data).toEqual({bar: 'message1'});
 
 		await catchError(
@@ -46,7 +52,7 @@ describe('/messages', () => {
 					afterTs: message1.ts.toString(),
 				},
 			}),
-		)) as any;
+		)) as Message;
 		expect(message2.data).toEqual({bar: 'message2'});
 		expect(message2.ts).toBeGreaterThan(message1.ts);
 
@@ -118,7 +124,7 @@ describe('/messages', () => {
 			testNode.messages.next.get({
 				$query: {environmentKey, path: 'foo', session: session1.session},
 			}),
-		)) as any;
+		)) as Message;
 		expect(session1Message.data).toEqual({bar: 'message1'});
 
 		// Add a message to the current session
@@ -135,7 +141,7 @@ describe('/messages', () => {
 			testNode.messages.next.get({
 				$query: {environmentKey, path: 'foo'},
 			}),
-		)) as any;
+		)) as Message;
 		expect(curSessionMessageAfter.data).toEqual({bar: 'message2'});
 
 		// Also current session
@@ -143,7 +149,7 @@ describe('/messages', () => {
 			testNode.messages.next.get({
 				$query: {environmentKey, path: 'foo', session: session2.session},
 			}),
-		)) as any;
+		)) as Message;
 		expect(session2MessageAfter).toEqual(curSessionMessageAfter);
 
 		// First session should have only the first message
