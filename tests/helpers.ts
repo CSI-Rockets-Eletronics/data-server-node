@@ -6,3 +6,7 @@ export async function catchError<T>(
 	if (error) throw error;
 	return data;
 }
+
+export function createTestEnvironmentKey() {
+	return `TEST:${crypto.randomUUID()}`;
+}
