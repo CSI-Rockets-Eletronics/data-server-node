@@ -14,22 +14,17 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			);
 			const fullPath = joinPath(curNodeInstance, body.path);
 
-			await prisma.record.upsert({
-				where: {
-					environmentKey_path_ts: {
+			// Use createMany to skip duplicates
+			await prisma.record.createMany({
+				data: [
+					{
 						environmentKey: body.environmentKey,
 						path: fullPath,
 						ts: body.ts,
+						data: body.data,
 					},
-				},
-				create: {
-					environmentKey: body.environmentKey,
-					path: fullPath,
-					ts: body.ts,
-					data: body.data,
-				},
-				update: {}, // Do nothing, as records are immutable
-				select: {ts: true},
+				],
+				skipDuplicates: true,
 			});
 
 			maybeSyncWorker?.onReceiveRecord();
