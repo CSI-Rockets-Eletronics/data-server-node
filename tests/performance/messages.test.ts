@@ -13,19 +13,19 @@ type Message = Exclude<
 describe('/messages', () => {
 	test('upload and get many messages', async () => {
 		for (const key of [environmentKey, environmentKey2]) {
-			for (let session = 0; session < 10; session++) {
+			for (let session = 0; session < 5; session++) {
 				await catchError(testNode.sessions.create.post({environmentKey: key}));
-			}
 
-			for (let path = 0; path < 10; path++) {
-				for (let message = 0; message < 100; message++) {
-					await catchError(
-						testNode.messages.post({
-							environmentKey,
-							path: `foo${path}`,
-							data: {bar: 'baz'},
-						}),
-					);
+				for (let path = 0; path < 5; path++) {
+					for (let message = 0; message < 100; message++) {
+						await catchError(
+							testNode.messages.post({
+								environmentKey,
+								path: `foo${path}`,
+								data: {bar: 'baz'},
+							}),
+						);
+					}
 				}
 			}
 		}

@@ -7,23 +7,23 @@ import {environmentKey, environmentKey2} from '../setup';
 describe('/records', () => {
 	test('upload and get many records', async () => {
 		const manyRecords: Array<{ts: number; data: unknown}> = [];
-		for (let ts = 0; ts < 10_000; ts++) {
+		for (let ts = 0; ts < 5000; ts++) {
 			manyRecords.push({ts, data: {bar: 'baz'}});
 		}
 
 		for (const key of [environmentKey, environmentKey2]) {
-			for (let session = 0; session < 10; session++) {
+			for (let session = 0; session < 5; session++) {
 				await catchError(testNode.sessions.create.post({environmentKey: key}));
-			}
 
-			for (let path = 0; path < 10; path++) {
-				await catchError(
-					testNode.records.batch.post({
-						environmentKey,
-						path: `foo${path}`,
-						records: manyRecords,
-					}),
-				);
+				for (let path = 0; path < 5; path++) {
+					await catchError(
+						testNode.records.batch.post({
+							environmentKey,
+							path: `foo${path}`,
+							records: manyRecords,
+						}),
+					);
+				}
 			}
 		}
 
