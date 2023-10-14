@@ -3,8 +3,8 @@ import {maybeParentNode, type ParentNode} from './parent-node';
 import {prisma} from './prisma';
 import {createMessage} from './routes/messages';
 
-const SYNC_RECORDS_DELAY_MS = 200;
-const SYNC_MESSAGES_DELAY_MS = 200;
+const SYNC_RECORDS_DELAY_MS = 0;
+const SYNC_MESSAGES_DELAY_MS = 0;
 
 /**
  * If no messages were received in the last 30s, switch to high-throughput +
@@ -14,7 +14,7 @@ const SYNC_MESSAGES_DELAY_MS = 200;
 const LIVE_THRESHOLD_SECS = 30;
 
 const LIVE_SYNC_RECORD_BATCH_SIZE = 100;
-const OFFLINE_SYNC_RECORD_BATCH_SIZE = 1000;
+const OFFLINE_SYNC_RECORD_BATCH_SIZE = 3000;
 
 export class SyncWorker {
 	// Milliseconds. Return value of Date.now().
