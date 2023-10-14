@@ -130,7 +130,7 @@ export class SyncWorker {
 
 		if (error) throw error;
 
-		if (nextMessage) {
+		if (nextMessage !== 'NONE') {
 			await createMessage({
 				environmentKey: nextMessage.environmentKey,
 				path: nextMessage.path,
