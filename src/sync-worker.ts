@@ -162,12 +162,10 @@ export class SyncWorker {
 	}
 
 	private logLiveSyncRecords(liveSyncRecords: boolean) {
-		if (liveSyncRecords !== this.lastLiveSyncRecords) {
-			if (liveSyncRecords) {
-				console.log('🔥 Switched to live sync for records');
-			} else {
-				console.log('🧊 Switched to offline sync for records');
-			}
+		if (liveSyncRecords && !this.lastLiveSyncRecords) {
+			console.log('🔥 Switched to live sync for records');
+		} else if (!liveSyncRecords && this.lastLiveSyncRecords) {
+			console.log('🧊 Switched to offline sync for records');
 		}
 
 		this.lastLiveSyncRecords = liveSyncRecords;
@@ -176,6 +174,8 @@ export class SyncWorker {
 	private logRecordsUpToDate(recordsUpToDate: boolean) {
 		if (recordsUpToDate && !this.lastRecordsUpToDate) {
 			console.log(`✅ Records are up to date`);
+		} else if (!recordsUpToDate && this.lastRecordsUpToDate) {
+			console.log(`⏳ Records are out of date`);
 		}
 
 		this.lastRecordsUpToDate = recordsUpToDate;
@@ -184,6 +184,8 @@ export class SyncWorker {
 	private logMessagesUpToDate(messagesUpToDate: boolean) {
 		if (messagesUpToDate && !this.lastMessagesUpToDate) {
 			console.log(`✅ Messages are up to date`);
+		} else if (!messagesUpToDate && this.lastMessagesUpToDate) {
+			console.log(`⏳ Messages are out of date`);
 		}
 
 		this.lastMessagesUpToDate = messagesUpToDate;
