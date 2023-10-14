@@ -200,8 +200,9 @@ describe('/records', () => {
 					$query: {environmentKey, path: 'foo'},
 				}),
 			);
-			expect(curSessionRecordsAfter.records).toHaveLength(1);
-			expect(curSessionRecordsAfter.records[0].ts).toBe(200);
+			expect(curSessionRecordsAfter.records).toEqual([
+				{ts: 200, data: {bar200: 'baz200'}},
+			]);
 
 			// Also current session
 			const session2RecordsAfter = await catchError(
@@ -210,7 +211,7 @@ describe('/records', () => {
 				}),
 			);
 			expect(session2RecordsAfter.records).toHaveLength(1);
-			expect(session2RecordsAfter.records[0].ts).toBe(200);
+			expect(session2RecordsAfter).toEqual(curSessionRecordsAfter);
 
 			// First session should have only the first record
 			const session1RecordsAfter = await catchError(
@@ -219,7 +220,9 @@ describe('/records', () => {
 				}),
 			);
 			expect(session1RecordsAfter.records).toHaveLength(1);
-			expect(session1RecordsAfter.records[0].ts).toBe(100);
+			expect(session1RecordsAfter.records).toEqual([
+				{ts: 100, data: {bar100: 'baz100'}},
+			]);
 		},
 	);
 
