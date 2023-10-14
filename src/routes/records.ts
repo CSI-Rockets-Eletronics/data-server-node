@@ -145,9 +145,11 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			const startTs =
 				query.startTs === undefined ? undefined : Number(query.startTs);
 			const endTs = query.endTs === undefined ? undefined : Number(query.endTs);
+			const take = query.take === undefined ? undefined : Number(query.take);
 
 			assert(!Number.isNaN(startTs), 'startTs must be a number');
 			assert(!Number.isNaN(endTs), 'endTs must be a number');
+			assert(!Number.isNaN(take), 'take must be a number');
 
 			const curNodeInstance =
 				query.session === undefined
@@ -164,7 +166,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 					ts: {gte: startTs, lte: endTs},
 				},
 				orderBy: {ts: startTs === undefined ? 'desc' : 'asc'},
-				take: query.take,
+				take,
 				select: {ts: true, data: true},
 			});
 
@@ -200,7 +202,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 					}),
 				),
 				take: t.Optional(
-					t.Integer({
+					t.String({
 						description:
 							'Maximum number of records to return. If `startTs` is specified, returns earliest records first. Otherwise, returns latest records first. Defaults to infinity.',
 					}),
