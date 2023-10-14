@@ -55,4 +55,6 @@ model Message {
   /// messages arrive.
   ts             BigInt @id
   data           Json
+
+  @@index([environmentKey, path, ts])
 }
