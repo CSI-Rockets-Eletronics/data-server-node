@@ -69,4 +69,95 @@ describe('/messages', () => {
 			),
 		).toBe('NONE');
 	});
+
+	test('upload ad get from multiple sessions', async () => {
+		const initialSessions = await catchError(
+			testNode.sessions.get({$query: {environmentKey}}),
+		);
+		expect(initialSessions.sessions).toHaveLength(0);
+
+		// Uploading a message should create a session
+		await catchError(
+			testNode.messages.post({
+				environmentKey,
+				path: 'foo',
+				data: {bar: 'message1'},
+			}),
+		);
+
+		const sessionsAfterOne = await catchError(
+			testNode.sessions.get({$query: {environmentKey}}),
+		);
+		expect(sessionsAfterOne.sessions).toHaveLength(1);
+
+		// Manually create a new session
+		await catchError(
+			testNode.sessions.create.post({
+				environmentKey,
+			}),
+		);
+
+		const sessionsAfterTwo = await catchError(
+			testNode.sessions.get({$query: {environmentKey}}),
+		);
+		expect(sessionsAfterTwo.sessions).toHaveLength(2);
+
+		// Current session should have no messages
+		const curSessionMessage = await catchError(
+			testNode.messages.next.get({$query: {environmentKey, path: 'foo'}}),
+		);
+		expect(curSessionMessage).toBe('NONE');
+
+		const session1 = sessionsAfterTwo.sessions[0];
+		const session2 = sessionsAfterTwo.sessions[1];
+
+		// Also current session
+		const session2Message = await catchError(
+			testNode.messages.next.get({
+				$query: {environmentKey, path: 'foo', session: session2.session},
+			}),
+		);
+		expect(session2Message).toBe('NONE');
+
+		// First session should have the message
+		const session1Message = (await catchError(
+			testNode.messages.next.get({
+				$query: {environmentKey, path: 'foo', session: session1.session},
+			}),
+		)) as Message;
+		expect(session1Message.data).toEqual({bar: 'message1'});
+
+		// Add a message to the current session
+		await catchError(
+			testNode.messages.post({
+				environmentKey,
+				path: 'foo',
+				data: {bar: 'message2'},
+			}),
+		);
+
+		// Current session should have the message
+		const curSessionMessageAfter = (await catchError(
+			testNode.messages.next.get({
+				$query: {environmentKey, path: 'foo'},
+			}),
+		)) as Message;
+		expect(curSessionMessageAfter.data).toEqual({bar: 'message2'});
+
+		// Also current session
+		const session2MessageAfter = (await catchError(
+			testNode.messages.next.get({
+				$query: {environmentKey, path: 'foo', session: session2.session},
+			}),
+		)) as Message;
+		expect(session2MessageAfter).toEqual(curSessionMessageAfter);
+
+		// First session should have only the first message
+		const session1MessageAfter = await catchError(
+			testNode.messages.next.get({
+				$query: {environmentKey, path: 'foo', session: session1.session},
+			}),
+		);
+		expect(session1MessageAfter).toEqual(session1Message);
+	});
 });
