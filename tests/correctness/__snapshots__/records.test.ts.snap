@@ -1,0 +1,281 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`/records upload and get 1`] = `
+{
+  "records": [
+    {
+      "data": {
+        "bar100": "baz100",
+      },
+      "ts": 100,
+    },
+  ],
+}
+`;
+
+exports[`/records upload and get 2`] = `
+{
+  "records": [
+    {
+      "data": {
+        "bar200": "baz200",
+      },
+      "ts": 200,
+    },
+    {
+      "data": {
+        "bar100": "baz100",
+      },
+      "ts": 100,
+    },
+  ],
+}
+`;
+
+exports[`/records upload and get 3`] = `
+{
+  "records": [
+    {
+      "data": {
+        "bar200": "baz200",
+      },
+      "ts": 200,
+    },
+    {
+      "data": {
+        "bar150": "baz150",
+      },
+      "ts": 150,
+    },
+    {
+      "data": {
+        "bar100": "baz100",
+      },
+      "ts": 100,
+    },
+  ],
+}
+`;
+
+exports[`/records upload and get 4`] = `
+{
+  "records": [
+    {
+      "data": {
+        "bar200": "baz200",
+      },
+      "ts": 200,
+    },
+    {
+      "data": {
+        "bar150": "baz150",
+      },
+      "ts": 150,
+    },
+    {
+      "data": {
+        "bar100": "baz100",
+      },
+      "ts": 100,
+    },
+  ],
+}
+`;
+
+exports[`/records upload batch 1`] = `
+{
+  "records": [
+    {
+      "data": {
+        "bar200": "baz200",
+      },
+      "ts": 200,
+    },
+    {
+      "data": {
+        "bar150": "baz150",
+      },
+      "ts": 150,
+    },
+    {
+      "data": {
+        "bar100": "baz100",
+      },
+      "ts": 100,
+    },
+  ],
+}
+`;
+
+exports[`/records upload batch 2`] = `
+{
+  "records": [
+    {
+      "data": {
+        "bar200": "baz200",
+      },
+      "ts": 300,
+    },
+    {
+      "data": {
+        "bar200": "baz200",
+      },
+      "ts": 200,
+    },
+    {
+      "data": {
+        "bar150": "baz150",
+      },
+      "ts": 150,
+    },
+    {
+      "data": {
+        "bar100": "baz100",
+      },
+      "ts": 100,
+    },
+  ],
+}
+`;
+
+exports[`/records more complicated get 1`] = `
+[
+  {
+    "records": [
+      {
+        "data": {
+          "bar100": "baz100",
+        },
+        "ts": 100,
+      },
+      {
+        "data": {
+          "bar200": "baz200",
+        },
+        "ts": 200,
+      },
+    ],
+  },
+  {
+    "records": [
+      {
+        "data": {
+          "bar100": "baz100",
+        },
+        "ts": 100,
+      },
+    ],
+  },
+  {
+    "records": [
+      {
+        "data": {
+          "bar200": "baz200",
+        },
+        "ts": 200,
+      },
+    ],
+  },
+  {
+    "records": [],
+  },
+]
+`;
+
+exports[`/records more complicated get 2`] = `
+[
+  {
+    "records": [
+      {
+        "data": {
+          "bar200": "baz200",
+        },
+        "ts": 200,
+      },
+      {
+        "data": {
+          "bar100": "baz100",
+        },
+        "ts": 100,
+      },
+    ],
+  },
+  {
+    "records": [
+      {
+        "data": {
+          "bar200": "baz200",
+        },
+        "ts": 200,
+      },
+    ],
+  },
+  {
+    "records": [
+      {
+        "data": {
+          "bar100": "baz100",
+        },
+        "ts": 100,
+      },
+    ],
+  },
+  {
+    "records": [],
+  },
+]
+`;
+
+exports[`/records more complicated get 3`] = `
+[
+  {
+    "records": [
+      {
+        "data": {
+          "bar100": "baz100",
+        },
+        "ts": 100,
+      },
+      {
+        "data": {
+          "bar200": "baz200",
+        },
+        "ts": 200,
+      },
+    ],
+  },
+  {
+    "records": [
+      {
+        "data": {
+          "bar100": "baz100",
+        },
+        "ts": 100,
+      },
+    ],
+  },
+  {
+    "records": [
+      {
+        "data": {
+          "bar200": "baz200",
+        },
+        "ts": 200,
+      },
+    ],
+  },
+  {
+    "records": [
+      {
+        "data": {
+          "bar100": "baz100",
+        },
+        "ts": 100,
+      },
+    ],
+  },
+  {
+    "records": [],
+  },
+]
+`;
