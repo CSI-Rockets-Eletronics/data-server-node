@@ -59,7 +59,7 @@ export const sessionsRoute = new Elysia({prefix: '/sessions'})
 					createdAt: {gte: createdAfter, lte: createdBefore},
 				},
 				orderBy: {createdAt: 'asc'},
-				select: {session: true, createdAt: true},
+				select: {createdAt: true, session: true},
 			});
 
 			return {

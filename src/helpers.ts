@@ -35,8 +35,8 @@ export async function createSession(environmentKey: string) {
 	return prisma.session.create({
 		data: {
 			environmentKey,
-			session: generateSession(),
 			createdAt: curTimeMicros(),
+			session: generateSession(),
 		},
 		select: {session: true, createdAt: true},
 	});
