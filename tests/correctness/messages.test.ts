@@ -27,7 +27,7 @@ describe('/messages', () => {
 		const message1 = (await catchError(
 			testNode.messages.next.get({$query: {environmentKey, path: 'foo'}}),
 		)) as Message;
-		expect(message1).toHaveProperty('data', {bar: 'message1'});
+		expect(message1.data).toEqual({bar: 'message1'});
 
 		await catchError(
 			testNode.messages.post({
@@ -38,11 +38,10 @@ describe('/messages', () => {
 		);
 
 		// Should still be message1 (earliest)
-		expect(
-			await catchError(
-				testNode.messages.next.get({$query: {environmentKey, path: 'foo'}}),
-			),
-		).toHaveProperty('data', {bar: 'message1'});
+		const stillMessage1 = await catchError(
+			testNode.messages.next.get({$query: {environmentKey, path: 'foo'}}),
+		);
+		expect(stillMessage1).toEqual(message1);
 
 		// Now get message2
 		const message2 = (await catchError(
@@ -54,7 +53,7 @@ describe('/messages', () => {
 				},
 			}),
 		)) as Message;
-		expect(message2).toHaveProperty('data', {bar: 'message2'});
+		expect(message2.data).toEqual({bar: 'message2'});
 		expect(message2.ts).toBeGreaterThan(message1.ts);
 
 		// Should have no more messages
