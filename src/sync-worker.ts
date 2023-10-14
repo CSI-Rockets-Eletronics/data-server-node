@@ -23,6 +23,11 @@ export class SyncWorker {
 	// Unix microseconds.
 	private lastSyncedMessageTs = curTimeMicros();
 
+	// For logging on state changes
+	private lastLiveSyncRecords = false;
+	private lastRecordsUpToDate = true;
+	private lastMessagesUpToDate = true;
+
 	constructor(private readonly parentNode: ParentNode) {}
 
 	async run() {
@@ -68,13 +73,14 @@ export class SyncWorker {
 	 * responses.
 	 */
 	private async syncRecords() {
-		const liveSync = await this.shouldLiveSyncRecords();
+		const liveSyncRecords = await this.shouldLiveSyncRecords();
+		this.logLiveSyncRecords(liveSyncRecords);
 
 		const latestRecords = await prisma.record.findMany({
 			where: {sentToParent: false},
 			// Always sync latest first, whether live or offline
 			orderBy: {receivedAtIndex: 'desc'},
-			take: liveSync
+			take: liveSyncRecords
 				? LIVE_SYNC_RECORD_BATCH_SIZE
 				: OFFLINE_SYNC_RECORD_BATCH_SIZE,
 			select: {
@@ -90,6 +96,9 @@ export class SyncWorker {
 		const maxIndex = latestRecords.at(0)?.receivedAtIndex;
 
 		const hasRecords = minIndex !== undefined && maxIndex !== undefined;
+
+		const recordsUpToDate = !hasRecords;
+		this.logRecordsUpToDate(recordsUpToDate);
 
 		if (hasRecords) {
 			const {error} = await this.parentNode.records.batchGlobal.post({
@@ -130,7 +139,10 @@ export class SyncWorker {
 
 		if (error) throw error;
 
-		if (nextMessage !== 'NONE') {
+		const messagesUpToDate = nextMessage === 'NONE';
+		this.logMessagesUpToDate(messagesUpToDate);
+
+		if (!messagesUpToDate) {
 			await createMessage({
 				environmentKey: nextMessage.environmentKey,
 				path: nextMessage.path,
@@ -147,6 +159,34 @@ export class SyncWorker {
 
 		const diff = Date.now() - this.latestRecordReceivedAt;
 		return diff < LIVE_THRESHOLD_SECS * 1000;
+	}
+
+	private logLiveSyncRecords(liveSyncRecords: boolean) {
+		if (liveSyncRecords !== this.lastLiveSyncRecords) {
+			if (liveSyncRecords) {
+				console.log('🔥 Switched to live sync for records');
+			} else {
+				console.log('🧊 Switched to offline sync for records');
+			}
+		}
+
+		this.lastLiveSyncRecords = liveSyncRecords;
+	}
+
+	private logRecordsUpToDate(recordsUpToDate: boolean) {
+		if (recordsUpToDate && !this.lastRecordsUpToDate) {
+			console.log(`✅ Records are up to date`);
+		}
+
+		this.lastRecordsUpToDate = recordsUpToDate;
+	}
+
+	private logMessagesUpToDate(messagesUpToDate: boolean) {
+		if (messagesUpToDate && !this.lastMessagesUpToDate) {
+			console.log(`✅ Messages are up to date`);
+		}
+
+		this.lastMessagesUpToDate = messagesUpToDate;
 	}
 }
 
