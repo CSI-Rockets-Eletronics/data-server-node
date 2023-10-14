@@ -23,7 +23,9 @@ describe('/records', () => {
 			await catchError(
 				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
 			),
-		).toMatchSnapshot();
+		).toEqual({
+			records: [{data: {bar100: 'baz100'}, ts: 100}],
+		});
 
 		await catchError(
 			testNode.records.post({
@@ -38,7 +40,12 @@ describe('/records', () => {
 			await catchError(
 				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
 			),
-		).toMatchSnapshot();
+		).toEqual({
+			records: [
+				{data: {bar200: 'baz200'}, ts: 200},
+				{data: {bar100: 'baz100'}, ts: 100},
+			],
+		});
 
 		await catchError(
 			testNode.records.post({
@@ -53,7 +60,13 @@ describe('/records', () => {
 			await catchError(
 				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
 			),
-		).toMatchSnapshot();
+		).toEqual({
+			records: [
+				{data: {bar200: 'baz200'}, ts: 200},
+				{data: {bar150: 'baz150'}, ts: 150},
+				{data: {bar100: 'baz100'}, ts: 100},
+			],
+		});
 
 		// Shouldn't overwrite existing record with same ts
 		await catchError(
@@ -69,7 +82,13 @@ describe('/records', () => {
 			await catchError(
 				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
 			),
-		).toMatchSnapshot();
+		).toEqual({
+			records: [
+				{data: {bar200: 'baz200'}, ts: 200},
+				{data: {bar150: 'baz150'}, ts: 150},
+				{data: {bar100: 'baz100'}, ts: 100},
+			],
+		});
 	});
 
 	test('upload batch', async () => {
@@ -89,7 +108,13 @@ describe('/records', () => {
 			await catchError(
 				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
 			),
-		).toMatchSnapshot();
+		).toEqual({
+			records: [
+				{data: {bar200: 'baz200'}, ts: 200},
+				{data: {bar150: 'baz150'}, ts: 150},
+				{data: {bar100: 'baz100'}, ts: 100},
+			],
+		});
 
 		// Add some overlapping records, which should be ignored
 		await catchError(
@@ -109,7 +134,14 @@ describe('/records', () => {
 			await catchError(
 				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
 			),
-		).toMatchSnapshot();
+		).toEqual({
+			records: [
+				{data: {bar200: 'baz200'}, ts: 300},
+				{data: {bar200: 'baz200'}, ts: 200},
+				{data: {bar150: 'baz150'}, ts: 150},
+				{data: {bar100: 'baz100'}, ts: 100},
+			],
+		});
 	});
 
 	test.each([false, true])(
@@ -265,7 +297,17 @@ describe('/records', () => {
 					$query: {environmentKey, path: 'foo', startTs: '300'},
 				}),
 			),
-		]).toMatchSnapshot();
+		]).toEqual([
+			{
+				records: [
+					{data: {bar100: 'baz100'}, ts: 100},
+					{data: {bar200: 'baz200'}, ts: 200},
+				],
+			},
+			{records: [{data: {bar100: 'baz100'}, ts: 100}]},
+			{records: [{data: {bar200: 'baz200'}, ts: 200}]},
+			{records: []},
+		]);
 
 		expect([
 			await catchError(
@@ -288,7 +330,17 @@ describe('/records', () => {
 					$query: {environmentKey, path: 'foo', endTs: '000'},
 				}),
 			),
-		]).toMatchSnapshot();
+		]).toEqual([
+			{
+				records: [
+					{data: {bar200: 'baz200'}, ts: 200},
+					{data: {bar100: 'baz100'}, ts: 100},
+				],
+			},
+			{records: [{data: {bar200: 'baz200'}, ts: 200}]},
+			{records: [{data: {bar100: 'baz100'}, ts: 100}]},
+			{records: []},
+		]);
 
 		expect([
 			await catchError(
@@ -322,6 +374,17 @@ describe('/records', () => {
 					$query: {environmentKey, path: 'foo', startTs: '200', endTs: '100'},
 				}),
 			),
-		]).toMatchSnapshot();
+		]).toEqual([
+			{
+				records: [
+					{data: {bar100: 'baz100'}, ts: 100},
+					{data: {bar200: 'baz200'}, ts: 200},
+				],
+			},
+			{records: [{data: {bar100: 'baz100'}, ts: 100}]},
+			{records: [{data: {bar200: 'baz200'}, ts: 200}]},
+			{records: [{data: {bar100: 'baz100'}, ts: 100}]},
+			{records: []},
+		]);
 	});
 });
