@@ -7,7 +7,7 @@ COPY --from=node:18 /usr/local/bin/node /usr/local/bin/node
 
 COPY package.json ./
 COPY bun.lockb ./
-RUN bun install
+RUN bun install --frozen-lockfile
 
 COPY prisma/schema.prisma prisma/
 RUN bun prisma:generate
