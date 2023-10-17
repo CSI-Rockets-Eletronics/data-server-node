@@ -17,6 +17,7 @@
     "prisma/schema.prisma": "prisma format"
   },
   "dependencies": {
+    "@elysiajs/cors": "^0.7.1",
     "@elysiajs/eden": "^0.6.5",
     "@elysiajs/swagger": "^0.6.2",
     "@prisma/client": "^5.2.0",

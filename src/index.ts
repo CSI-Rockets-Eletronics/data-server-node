@@ -1,4 +1,5 @@
 import {Elysia} from 'elysia';
+import {cors} from '@elysiajs/cors';
 import {swagger} from '@elysiajs/swagger';
 import {env} from './env';
 import {sessionsRoute} from './routes/sessions';
@@ -6,6 +7,7 @@ import {recordsRoute} from './routes/records';
 import {messagesRoute} from './routes/messages';
 
 const app = new Elysia()
+	.use(cors())
 	.use(
 		swagger({
 			documentation: {
