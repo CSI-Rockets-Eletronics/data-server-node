@@ -9,6 +9,11 @@ describe('/sessions', () => {
 			testNode.sessions.get({$query: {environmentKey}}),
 		);
 		expect(initial.sessions).toHaveLength(0);
+		expect(
+			await catchError(
+				testNode.sessions.current.get({$query: {environmentKey}}),
+			),
+		).toBe('NONE');
 
 		await catchError(testNode.sessions.create.post({environmentKey}));
 
@@ -17,12 +22,22 @@ describe('/sessions', () => {
 		);
 		expect(afterOne.sessions).toHaveLength(1);
 
+		const currentAfterOne = await catchError(
+			testNode.sessions.current.get({$query: {environmentKey}}),
+		);
+		expect(currentAfterOne).toEqual(afterOne.sessions[0]);
+
 		await catchError(testNode.sessions.create.post({environmentKey}));
 
 		const afterTwo = await catchError(
 			testNode.sessions.get({$query: {environmentKey}}),
 		);
 		expect(afterTwo.sessions).toHaveLength(2);
+
+		const currentAfterTwo = await catchError(
+			testNode.sessions.current.get({$query: {environmentKey}}),
+		);
+		expect(currentAfterTwo).toEqual(afterTwo.sessions[1]);
 
 		const one = afterTwo.sessions[0];
 		const two = afterTwo.sessions[1];

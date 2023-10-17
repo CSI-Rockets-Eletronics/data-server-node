@@ -100,4 +100,42 @@ export const sessionsRoute = new Elysia({prefix: '/sessions'})
 				),
 			}),
 		},
+	)
+	.get(
+		'/current',
+		async ({query}) => {
+			assertIsSessionMaker();
+
+			const session = await prisma.session.findFirst({
+				where: {
+					environmentKey: query.environmentKey,
+				},
+				orderBy: {createdAt: 'desc'},
+				select: {createdAt: true, session: true},
+			});
+
+			if (!session) {
+				return 'NONE';
+			}
+
+			return {
+				session: session.session,
+				createdAt: Number(session.createdAt),
+			};
+		},
+		{
+			detail: {
+				summary: 'List sessions for a given environment.',
+			},
+			query: t.Object({
+				environmentKey: t.String(),
+			}),
+			response: t.Union([
+				t.Object({
+					session: t.String(),
+					createdAt: schemas.unixMicros,
+				}),
+				t.Literal('NONE'), // Elysia doesn't like returning null
+			]),
+		},
 	);
