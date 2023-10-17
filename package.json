@@ -1,6 +1,6 @@
 {
   "name": "data-server-node",
-  "version": "1.0.51",
+  "version": "1.0.0",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
     "start": "bun run src/index.ts",
@@ -31,5 +31,7 @@
     "prisma": "^5.2.0",
     "xo": "^0.56.0"
   },
-  "main": "src/index.ts"
+  "exports": {
+    "./api": "./src/api.ts"
+  }
 }
