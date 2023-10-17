@@ -6,10 +6,29 @@ import {sessionsRoute} from './routes/sessions';
 import {recordsRoute} from './routes/records';
 import {messagesRoute} from './routes/messages';
 
+const swaggerPath = `${env.MOUNT_PATH}/swagger`;
+
 const app = new Elysia()
+	.onError(({error, set}) => {
+		console.error('Error in route handler:', error);
+
+		set.status = 500;
+		return {
+			error: `${error.name}: ${error.message}`,
+		};
+	})
+	.get('/', ({set}) => {
+		set.redirect = swaggerPath;
+	})
+	.use(sessionsRoute)
+	.use(recordsRoute)
+	.use(messagesRoute);
+
+const mountedApp = new Elysia({prefix: env.MOUNT_PATH})
 	.use(cors())
 	.use(
 		swagger({
+			path: swaggerPath,
 			documentation: {
 				info: {
 					title: `CSI Rockets Data Server: Node "${env.NODE_NAME}"`,
@@ -20,22 +39,6 @@ const app = new Elysia()
 			},
 		}),
 	)
-	.get('/', ({set}) => {
-		set.redirect = `${env.MOUNT_PATH ?? ''}/swagger`;
-	})
-	.onError(({error, set}) => {
-		console.error('Error in route handler:', error);
-
-		set.status = 500;
-		return {
-			error: `${error.name}: ${error.message}`,
-		};
-	})
-	.use(sessionsRoute)
-	.use(recordsRoute)
-	.use(messagesRoute);
-
-const mountedApp = new Elysia({prefix: env.MOUNT_PATH ?? '/'})
 	.use(app)
 	.listen(env.PORT);
 
