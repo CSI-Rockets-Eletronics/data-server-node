@@ -1,7 +1,12 @@
 import assert from 'node:assert';
 import {Elysia, t} from 'elysia';
 import {prisma} from '../prisma';
-import {getOrInitCurNodeInstance, joinPath, toNodeInstance} from '../helpers';
+import {
+	curTimeMicros,
+	getOrInitCurNodeInstance,
+	joinPath,
+	toNodeInstance,
+} from '../helpers';
 import {maybeSyncWorker} from '../sync-worker';
 import {schemas} from './schemas';
 
@@ -20,7 +25,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 					{
 						environmentKey: body.environmentKey,
 						path: fullPath,
-						ts: body.ts,
+						ts: body.ts ?? curTimeMicros(),
 						data: body.data,
 					},
 				],
@@ -36,7 +41,12 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			body: t.Object({
 				environmentKey: t.String(),
 				path: schemas.pathWithoutNodeInstance,
-				ts: schemas.unixMicros,
+				ts: t.Optional(
+					t.Integer({
+						description:
+							'Unix microseconds. Defaults to the current time of this node.',
+					}),
+				),
 				data: schemas.data,
 			}),
 		},

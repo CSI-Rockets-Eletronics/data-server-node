@@ -91,6 +91,33 @@ describe('/records', () => {
 		});
 	});
 
+	test('upload using automatic ts', async () => {
+		await catchError(
+			testNode.records.post({
+				environmentKey,
+				path: 'foo',
+				data: {bar100: 'baz100'},
+			}),
+		);
+		await catchError(
+			testNode.records.post({
+				environmentKey,
+				path: 'foo',
+				data: {bar200: 'baz200'},
+			}),
+		);
+
+		const records = await catchError(
+			testNode.records.get({$query: {environmentKey, path: 'foo'}}),
+		);
+		expect(records.records).toHaveLength(2);
+
+		const [later, earlier] = records.records;
+		expect(later.data).toEqual({bar200: 'baz200'});
+		expect(earlier.data).toEqual({bar100: 'baz100'});
+		expect(later.ts).toBeGreaterThan(earlier.ts);
+	});
+
 	test('upload batch', async () => {
 		await catchError(
 			testNode.records.batch.post({
