@@ -1,6 +1,6 @@
 {
   "name": "data-server-node",
-  "version": "1.0.50",
+  "version": "1.0.51",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
     "start": "bun run src/index.ts",
