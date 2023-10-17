@@ -30,9 +30,5 @@
     "prettier": "^3.0.3",
     "prisma": "^5.2.0",
     "xo": "^0.56.0"
-  },
-  "module": "src/index.js",
-  "exports": {
-    ".": "./src/index.js"
   }
 }
