@@ -34,7 +34,7 @@
   "module": "src/index.js",
   "exports": {
     "api": {
-      "import": "./src/api.ts"
+      "import": "./src/api.js"
     }
   }
 }
