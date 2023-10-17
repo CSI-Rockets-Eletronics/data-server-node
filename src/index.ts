@@ -21,7 +21,7 @@ const app = new Elysia()
 		}),
 	)
 	.get('/', ({set}) => {
-		set.redirect = '/swagger';
+		set.redirect = `${env.MOUNT_PATH ?? ''}/swagger`;
 	})
 	.onError(({error, set}) => {
 		console.error('Error in route handler:', error);
