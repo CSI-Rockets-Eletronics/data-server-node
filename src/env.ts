@@ -2,6 +2,10 @@ import process from 'node:process';
 import {z} from 'zod';
 
 const envSchema = z.object({
+	MOUNT_PATH: z
+		.string()
+		.transform((value) => value || undefined)
+		.optional(),
 	PORT: z.string().transform(Number),
 	NODE_NAME: z.string(),
 	IS_SESSION_MAKER: z

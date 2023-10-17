@@ -6,6 +6,7 @@ services:
       - postgres
     environment:
       - DATABASE_URL=postgres://user:pass@postgres:5432/db
+      - MOUNT_PATH
       - NODE_NAME
       - IS_SESSION_MAKER
       - PARENT_NODE_URL

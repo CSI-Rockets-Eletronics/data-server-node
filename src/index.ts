@@ -33,11 +33,14 @@ const app = new Elysia()
 	})
 	.use(sessionsRoute)
 	.use(recordsRoute)
-	.use(messagesRoute)
+	.use(messagesRoute);
+
+const mountedApp = new Elysia({prefix: env.MOUNT_PATH ?? '/'})
+	.use(app)
 	.listen(env.PORT);
 
 export type App = typeof app;
 
 console.log(
-	`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}\n`,
+	`🦊 Elysia is running at http://${mountedApp.server?.hostname}:${mountedApp.server?.port}\n`,
 );
