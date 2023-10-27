@@ -17,9 +17,13 @@ const app = new Elysia()
 			error: `${error.name}: ${error.message}`,
 		};
 	})
-	.get('/', ({set}) => {
-		set.redirect = swaggerPath;
-	})
+	.get(
+		'/',
+		({set}) => {
+			set.redirect = swaggerPath;
+		},
+		{detail: {summary: 'Redirects to the Swagger UI.'}},
+	)
 	.use(sessionsRoute)
 	.use(recordsRoute)
 	.use(messagesRoute);
