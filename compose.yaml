@@ -5,7 +5,7 @@ services:
     depends_on:
       - postgres
     environment:
-      - DATABASE_URL=postgres://user:pass@postgres:5432/db
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/db
       - MOUNT_PATH
       - NODE_NAME
       - IS_SESSION_MAKER
@@ -17,9 +17,11 @@ services:
     image: postgres
     restart: always
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: db
+    ports:
+      - ${DB_PORT}:5432
     volumes:
       - postgres:/var/lib/postgresql/data
 
