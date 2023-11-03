@@ -1,4 +1,5 @@
-FROM oven/bun:latest
+# not using bun:latest because of https://github.com/oven-sh/bun/issues/6869
+FROM oven/bun:1.0.7
 WORKDIR /app
 
 # hack: prisma has a hard dependency on node, so without this, prisma:generate
