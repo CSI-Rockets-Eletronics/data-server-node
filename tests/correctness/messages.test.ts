@@ -70,6 +70,56 @@ describe('/messages', () => {
 		).toBe('NONE');
 	});
 
+	test('upload and get next by prefix', async () => {
+		await catchError(
+			testNode.messages.post({
+				environmentKey,
+				path: 'foo',
+				data: 'foo',
+			}),
+		);
+		await catchError(
+			testNode.messages.post({
+				environmentKey,
+				path: 'foo/bar',
+				data: 'foo/bar',
+			}),
+		);
+		await catchError(
+			testNode.messages.post({
+				environmentKey,
+				path: 'foo:bar',
+				data: 'foo:bar',
+			}),
+		);
+
+		expect(
+			await catchError(
+				testNode.messages.next.get({$query: {environmentKey, path: 'foo'}}),
+			),
+		).toEqual({data: 'foo', ts: expect.any(Number)});
+		expect(
+			await catchError(
+				testNode.messages.next.get({$query: {environmentKey, path: 'foo/'}}),
+			),
+		).toEqual({data: 'foo/bar', ts: expect.any(Number)});
+		expect(
+			await catchError(
+				testNode.messages.next.get({$query: {environmentKey, path: 'foo/bar'}}),
+			),
+		).toEqual({data: 'foo/bar', ts: expect.any(Number)});
+		expect(
+			await catchError(
+				testNode.messages.next.get({$query: {environmentKey, path: 'foo:'}}),
+			),
+		).toEqual({data: 'foo:bar', ts: expect.any(Number)});
+		expect(
+			await catchError(
+				testNode.messages.next.get({$query: {environmentKey, path: 'foo:bar'}}),
+			),
+		).toEqual({data: 'foo:bar', ts: expect.any(Number)});
+	});
+
 	test('upload ad get from multiple sessions', async () => {
 		const initialSessions = await catchError(
 			testNode.sessions.get({$query: {environmentKey}}),

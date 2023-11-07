@@ -91,6 +91,59 @@ describe('/records', () => {
 		});
 	});
 
+	test('upload and get by prefix', async () => {
+		await catchError(
+			testNode.records.post({
+				environmentKey,
+				path: 'foo',
+				ts: 0,
+				data: 'foo',
+			}),
+		);
+		await catchError(
+			testNode.records.post({
+				environmentKey,
+				path: 'foo/bar',
+				ts: 0,
+				data: 'foo/bar',
+			}),
+		);
+		await catchError(
+			testNode.records.post({
+				environmentKey,
+				path: 'foo:bar',
+				ts: 0,
+				data: 'foo:bar',
+			}),
+		);
+
+		expect(
+			await catchError(
+				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
+			),
+		).toEqual({records: [{data: 'foo', ts: 0}]});
+		expect(
+			await catchError(
+				testNode.records.get({$query: {environmentKey, path: 'foo/'}}),
+			),
+		).toEqual({records: [{data: 'foo/bar', ts: 0}]});
+		expect(
+			await catchError(
+				testNode.records.get({$query: {environmentKey, path: 'foo/bar'}}),
+			),
+		).toEqual({records: [{data: 'foo/bar', ts: 0}]});
+		expect(
+			await catchError(
+				testNode.records.get({$query: {environmentKey, path: 'foo:'}}),
+			),
+		).toEqual({records: [{data: 'foo:bar', ts: 0}]});
+		expect(
+			await catchError(
+				testNode.records.get({$query: {environmentKey, path: 'foo:bar'}}),
+			),
+		).toEqual({records: [{data: 'foo:bar', ts: 0}]});
+	});
+
 	test('upload using automatic ts', async () => {
 		await catchError(
 			testNode.records.post({
