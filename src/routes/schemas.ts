@@ -7,7 +7,7 @@ export const schemas = {
 	}),
 	pathPrefixWithoutNodeInstance: t.String({
 		description:
-			"Path without the current node instance. If ending in a '/', the path will be matched by prefix. Otherwise, the path will be matched exactly.",
+			"Path without the current node instance. If ending in a '/' or ':', the path will be matched by prefix. Otherwise, the path will be matched exactly.",
 	}),
 	unixMicros: t.Integer({description: 'Unix microseconds.'}),
 	data: t.Any(),

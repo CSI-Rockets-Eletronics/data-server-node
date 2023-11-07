@@ -62,7 +62,7 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 					: toNodeInstance(query.session);
 
 			const fullPath = joinPath(curNodeInstance, query.path);
-			const matchPrefix = fullPath.endsWith('/');
+			const matchPrefix = fullPath.endsWith('/') || fullPath.endsWith(':');
 
 			const message = await prisma.message.findFirst({
 				where: {

@@ -162,7 +162,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 					: toNodeInstance(query.session);
 
 			const fullPath = joinPath(curNodeInstance, query.path);
-			const matchPrefix = fullPath.endsWith('/');
+			const matchPrefix = fullPath.endsWith('/') || fullPath.endsWith(':');
 
 			const records = await prisma.record.findMany({
 				where: {
