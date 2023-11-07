@@ -32,14 +32,14 @@ export function splitPath(path: string): string[] {
 }
 
 export async function createSession(environmentKey: string) {
-	return prisma.session.create({
+	return (await prisma.session.create({
 		data: {
 			environmentKey,
 			createdAt: curTimeMicros(),
 			session: generateSession(),
 		},
 		select: {session: true, createdAt: true},
-	});
+	})) as {session: string; createdAt: bigint}; // Weird ts error
 }
 
 /// Gets the node instance for the latest session, or creates a new session if
