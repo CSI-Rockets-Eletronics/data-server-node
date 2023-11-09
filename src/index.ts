@@ -9,11 +9,14 @@ import {messagesRoute} from './routes/messages';
 const swaggerPath = `${env.MOUNT_PATH}/swagger`;
 
 const app = new Elysia()
+	// Elysia doesn't understand content-encoding: gzip, so we have to do it ourselves.
 	.onParse(async ({request}, contentType) => {
 		if (contentType === 'application/json-gzip') {
 			const compressed = await request.arrayBuffer();
 			const decompressed = Bun.gunzipSync(new Uint8Array(compressed));
-			return new TextDecoder().decode(decompressed);
+			const decoded = new TextDecoder().decode(decompressed);
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+			return JSON.parse(decoded);
 		}
 	})
 	.onError(({error, set}) => {
