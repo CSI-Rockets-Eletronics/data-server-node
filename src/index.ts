@@ -9,6 +9,13 @@ import {messagesRoute} from './routes/messages';
 const swaggerPath = `${env.MOUNT_PATH}/swagger`;
 
 const app = new Elysia()
+	.onParse(async ({request}, contentType) => {
+		if (contentType === 'application/json-gzip') {
+			const compressed = await request.arrayBuffer();
+			const decompressed = Bun.gunzipSync(new Uint8Array(compressed));
+			return new TextDecoder().decode(decompressed);
+		}
+	})
 	.onError(({error, set}) => {
 		console.error('Error in route handler:', error);
 
