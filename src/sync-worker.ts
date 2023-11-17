@@ -1,3 +1,4 @@
+import {env} from './env';
 import {curTimeMicros} from './helpers';
 import {maybeParentNode, type ParentNode} from './parent-node';
 import {prisma} from './prisma';
@@ -143,11 +144,16 @@ export class SyncWorker {
 		this.logMessagesUpToDate(messagesUpToDate);
 
 		if (!messagesUpToDate) {
-			await createMessage({
-				environmentKey: nextMessage.environmentKey,
-				path: nextMessage.path,
-				data: nextMessage.data,
-			});
+			// ignore all messages not addressed to this node
+			const pathPrefix = env.NODE_NAME + '/';
+			if (nextMessage.path.startsWith(pathPrefix)) {
+				await createMessage({
+					environmentKey: nextMessage.environmentKey,
+					path: nextMessage.path.slice(pathPrefix.length),
+					data: nextMessage.data,
+				});
+			}
+
 			this.lastSyncedMessageTs = nextMessage.ts;
 		}
 	}
