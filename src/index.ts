@@ -5,6 +5,8 @@ import {env} from './env';
 import {sessionsRoute} from './routes/sessions';
 import {recordsRoute} from './routes/records';
 import {messagesRoute} from './routes/messages';
+import {schemas} from './routes/schemas';
+import {curTimeMicros} from './helpers';
 
 const swaggerPath = `${env.MOUNT_PATH}/swagger`;
 
@@ -33,6 +35,16 @@ const app = new Elysia()
 			set.redirect = swaggerPath;
 		},
 		{detail: {summary: 'Redirects to the Swagger UI.'}},
+	)
+	.get(
+		'/ts',
+		() => {
+			return curTimeMicros();
+		},
+		{
+			detail: {summary: 'Get the current timestamp of the node.'},
+			response: schemas.unixMicros,
+		},
 	)
 	.use(sessionsRoute)
 	.use(recordsRoute)
