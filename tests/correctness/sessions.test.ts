@@ -15,24 +15,30 @@ describe('/sessions', () => {
 			),
 		).toBe('NONE');
 
-		await catchError(testNode.sessions.create.post({environmentKey}));
+		await catchError(
+			testNode.sessions.create.post({environmentKey, name: 'foo'}),
+		);
 
 		const afterOne = await catchError(
 			testNode.sessions.get({$query: {environmentKey}}),
 		);
 		expect(afterOne.sessions).toHaveLength(1);
+		expect(afterOne.sessions[0].name).toBe('foo');
 
 		const currentAfterOne = await catchError(
 			testNode.sessions.current.get({$query: {environmentKey}}),
 		);
 		expect(currentAfterOne).toEqual(afterOne.sessions[0]);
 
-		await catchError(testNode.sessions.create.post({environmentKey}));
+		await catchError(
+			testNode.sessions.create.post({environmentKey, name: 'bar'}),
+		);
 
 		const afterTwo = await catchError(
 			testNode.sessions.get({$query: {environmentKey}}),
 		);
 		expect(afterTwo.sessions).toHaveLength(2);
+		expect(afterTwo.sessions[1].name).toBe('bar');
 
 		const currentAfterTwo = await catchError(
 			testNode.sessions.current.get({$query: {environmentKey}}),
