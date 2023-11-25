@@ -1,14 +1,30 @@
 import {prisma} from './prisma';
 
+/**
+ * If `sessionName` is undefined, defaults to the current session.
+ */
 export async function getSessionTimeRange(
 	environmentKey: string,
-	sessionName: string,
+	sessionName: string | undefined,
 ): Promise<{
 	/** Inclusive */
-	start: number;
+	start: number | undefined;
 	/** Inclusive */
 	end: number | undefined;
 }> {
+	if (sessionName === undefined) {
+		const curSession = await prisma.session.findFirst({
+			where: {environmentKey},
+			orderBy: {createdAt: 'desc'},
+			select: {createdAt: true},
+		});
+
+		return {
+			start: curSession ? Number(curSession.createdAt) : undefined,
+			end: undefined,
+		};
+	}
+
 	const session = await prisma.session.findUnique({
 		where: {
 			environmentKey_name: {

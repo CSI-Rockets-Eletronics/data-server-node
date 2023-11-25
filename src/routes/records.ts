@@ -117,10 +117,10 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			assert(!Number.isNaN(endTs), 'endTs must be a number');
 			assert(!Number.isNaN(take), 'take must be a number');
 
-			const sessionTimeRange =
-				query.sessionName === undefined
-					? undefined
-					: await getSessionTimeRange(query.environmentKey, query.sessionName);
+			const sessionTimeRange = await getSessionTimeRange(
+				query.environmentKey,
+				query.sessionName,
+			);
 
 			const records = await prisma.record.findMany({
 				where: {
@@ -128,9 +128,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 					device: query.device,
 					AND: [
 						{ts: {gte: startTs, lte: endTs}},
-						sessionTimeRange
-							? {ts: {gte: sessionTimeRange.start, lte: sessionTimeRange.end}}
-							: {},
+						{ts: {gte: sessionTimeRange.start, lte: sessionTimeRange.end}},
 					],
 				},
 				orderBy: {ts: startTs === undefined ? 'desc' : 'asc'},

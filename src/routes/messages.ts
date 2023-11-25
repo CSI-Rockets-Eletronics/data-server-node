@@ -37,10 +37,10 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 
 			assert(!Number.isNaN(afterTs), 'afterTs must be a number');
 
-			const sessionTimeRange =
-				query.sessionName === undefined
-					? undefined
-					: await getSessionTimeRange(query.environmentKey, query.sessionName);
+			const sessionTimeRange = await getSessionTimeRange(
+				query.environmentKey,
+				query.sessionName,
+			);
 
 			const message = await prisma.message.findFirst({
 				where: {
@@ -48,9 +48,7 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 					device: query.device,
 					AND: [
 						{ts: {gt: afterTs}},
-						sessionTimeRange
-							? {ts: {gte: sessionTimeRange.start, lte: sessionTimeRange.end}}
-							: {},
+						{ts: {gte: sessionTimeRange.start, lte: sessionTimeRange.end}},
 					],
 				},
 				orderBy: {ts: 'asc'},
