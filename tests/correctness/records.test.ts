@@ -6,14 +6,14 @@ import {environmentKey} from '../setup';
 describe('/records', () => {
 	test('upload and get', async () => {
 		const initial = await catchError(
-			testNode.records.get({$query: {environmentKey, path: 'foo'}}),
+			testNode.records.get({$query: {environmentKey, device: 'foo'}}),
 		);
 		expect(initial.records).toHaveLength(0);
 
 		await catchError(
 			testNode.records.post({
 				environmentKey,
-				path: 'foo',
+				device: 'foo',
 				ts: 100,
 				data: {bar100: 'baz100'},
 			}),
@@ -21,7 +21,7 @@ describe('/records', () => {
 
 		expect(
 			await catchError(
-				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
+				testNode.records.get({$query: {environmentKey, device: 'foo'}}),
 			),
 		).toEqual({
 			records: [{data: {bar100: 'baz100'}, ts: 100}],
@@ -30,7 +30,7 @@ describe('/records', () => {
 		await catchError(
 			testNode.records.post({
 				environmentKey,
-				path: 'foo',
+				device: 'foo',
 				ts: 200,
 				data: {bar200: 'baz200'},
 			}),
@@ -38,7 +38,7 @@ describe('/records', () => {
 
 		expect(
 			await catchError(
-				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
+				testNode.records.get({$query: {environmentKey, device: 'foo'}}),
 			),
 		).toEqual({
 			records: [
@@ -50,7 +50,7 @@ describe('/records', () => {
 		await catchError(
 			testNode.records.post({
 				environmentKey,
-				path: 'foo',
+				device: 'foo',
 				ts: 150,
 				data: {bar150: 'baz150'},
 			}),
@@ -58,7 +58,7 @@ describe('/records', () => {
 
 		expect(
 			await catchError(
-				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
+				testNode.records.get({$query: {environmentKey, device: 'foo'}}),
 			),
 		).toEqual({
 			records: [
@@ -72,7 +72,7 @@ describe('/records', () => {
 		await catchError(
 			testNode.records.post({
 				environmentKey,
-				path: 'foo',
+				device: 'foo',
 				ts: 100,
 				data: {bar100: 'this should not appear'},
 			}),
@@ -80,7 +80,7 @@ describe('/records', () => {
 
 		expect(
 			await catchError(
-				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
+				testNode.records.get({$query: {environmentKey, device: 'foo'}}),
 			),
 		).toEqual({
 			records: [
@@ -91,77 +91,24 @@ describe('/records', () => {
 		});
 	});
 
-	test('upload and get by prefix', async () => {
-		await catchError(
-			testNode.records.post({
-				environmentKey,
-				path: 'foo',
-				ts: 0,
-				data: 'foo',
-			}),
-		);
-		await catchError(
-			testNode.records.post({
-				environmentKey,
-				path: 'foo/bar',
-				ts: 0,
-				data: 'foo/bar',
-			}),
-		);
-		await catchError(
-			testNode.records.post({
-				environmentKey,
-				path: 'foo:bar',
-				ts: 0,
-				data: 'foo:bar',
-			}),
-		);
-
-		expect(
-			await catchError(
-				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
-			),
-		).toEqual({records: [{data: 'foo', ts: 0}]});
-		expect(
-			await catchError(
-				testNode.records.get({$query: {environmentKey, path: 'foo/'}}),
-			),
-		).toEqual({records: [{data: 'foo/bar', ts: 0}]});
-		expect(
-			await catchError(
-				testNode.records.get({$query: {environmentKey, path: 'foo/bar'}}),
-			),
-		).toEqual({records: [{data: 'foo/bar', ts: 0}]});
-		expect(
-			await catchError(
-				testNode.records.get({$query: {environmentKey, path: 'foo:'}}),
-			),
-		).toEqual({records: [{data: 'foo:bar', ts: 0}]});
-		expect(
-			await catchError(
-				testNode.records.get({$query: {environmentKey, path: 'foo:bar'}}),
-			),
-		).toEqual({records: [{data: 'foo:bar', ts: 0}]});
-	});
-
 	test('upload using automatic ts', async () => {
 		await catchError(
 			testNode.records.post({
 				environmentKey,
-				path: 'foo',
+				device: 'foo',
 				data: {bar100: 'baz100'},
 			}),
 		);
 		await catchError(
 			testNode.records.post({
 				environmentKey,
-				path: 'foo',
+				device: 'foo',
 				data: {bar200: 'baz200'},
 			}),
 		);
 
 		const records = await catchError(
-			testNode.records.get({$query: {environmentKey, path: 'foo'}}),
+			testNode.records.get({$query: {environmentKey, device: 'foo'}}),
 		);
 		expect(records.records).toHaveLength(2);
 
@@ -175,7 +122,7 @@ describe('/records', () => {
 		await catchError(
 			testNode.records.batch.post({
 				environmentKey,
-				path: 'foo',
+				device: 'foo',
 				records: [
 					{ts: 100, data: {bar100: 'baz100'}},
 					{ts: 200, data: {bar200: 'baz200'}},
@@ -186,7 +133,7 @@ describe('/records', () => {
 
 		expect(
 			await catchError(
-				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
+				testNode.records.get({$query: {environmentKey, device: 'foo'}}),
 			),
 		).toEqual({
 			records: [
@@ -200,7 +147,7 @@ describe('/records', () => {
 		await catchError(
 			testNode.records.batch.post({
 				environmentKey,
-				path: 'foo',
+				device: 'foo',
 				records: [
 					{ts: 200, data: {bar200: 'this should not appear'}},
 					{ts: 150, data: {bar150: 'this should not appear'}},
@@ -212,7 +159,7 @@ describe('/records', () => {
 
 		expect(
 			await catchError(
-				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
+				testNode.records.get({$query: {environmentKey, device: 'foo'}}),
 			),
 		).toEqual({
 			records: [
@@ -237,12 +184,12 @@ describe('/records', () => {
 				batchUpload
 					? testNode.records.batch.post({
 							environmentKey,
-							path: 'foo',
+							device: 'foo',
 							records: [{ts: 100, data: {bar100: 'baz100'}}],
 					  })
 					: testNode.records.post({
 							environmentKey,
-							path: 'foo',
+							device: 'foo',
 							ts: 100,
 							data: {bar100: 'baz100'},
 					  }),
@@ -267,7 +214,7 @@ describe('/records', () => {
 
 			// Current session should have no records
 			const curSessionRecords = await catchError(
-				testNode.records.get({$query: {environmentKey, path: 'foo'}}),
+				testNode.records.get({$query: {environmentKey, device: 'foo'}}),
 			);
 			expect(curSessionRecords.records).toHaveLength(0);
 
@@ -277,7 +224,7 @@ describe('/records', () => {
 			// Also current session
 			const session2Records = await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', session: session2.session},
+					$query: {environmentKey, device: 'foo', sessionName: session2.name},
 				}),
 			);
 			expect(session2Records.records).toHaveLength(0);
@@ -285,7 +232,7 @@ describe('/records', () => {
 			// First session should have the record
 			const session1Records = await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', session: session1.session},
+					$query: {environmentKey, device: 'foo', sessionName: session1.name},
 				}),
 			);
 			expect(session1Records.records).toHaveLength(1);
@@ -295,12 +242,12 @@ describe('/records', () => {
 				batchUpload
 					? testNode.records.batch.post({
 							environmentKey,
-							path: 'foo',
+							device: 'foo',
 							records: [{ts: 200, data: {bar200: 'baz200'}}],
 					  })
 					: testNode.records.post({
 							environmentKey,
-							path: 'foo',
+							device: 'foo',
 							ts: 200,
 							data: {bar200: 'baz200'},
 					  }),
@@ -309,7 +256,7 @@ describe('/records', () => {
 			// Current session should have the record
 			const curSessionRecordsAfter = await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo'},
+					$query: {environmentKey, device: 'foo'},
 				}),
 			);
 			expect(curSessionRecordsAfter.records).toEqual([
@@ -319,7 +266,7 @@ describe('/records', () => {
 			// Also current session
 			const session2RecordsAfter = await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', session: session2.session},
+					$query: {environmentKey, device: 'foo', sessionName: session2.name},
 				}),
 			);
 			expect(session2RecordsAfter.records).toHaveLength(1);
@@ -328,7 +275,7 @@ describe('/records', () => {
 			// First session should have only the first record
 			const session1RecordsAfter = await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', session: session1.session},
+					$query: {environmentKey, device: 'foo', sessionName: session1.name},
 				}),
 			);
 			expect(session1RecordsAfter.records).toHaveLength(1);
@@ -341,7 +288,7 @@ describe('/records', () => {
 	test('more complicated get', async () => {
 		await testNode.records.batch.post({
 			environmentKey,
-			path: 'foo',
+			device: 'foo',
 			records: [
 				{ts: 100, data: {bar100: 'baz100'}},
 				{ts: 200, data: {bar200: 'baz200'}},
@@ -349,7 +296,7 @@ describe('/records', () => {
 		});
 		await testNode.records.batch.post({
 			environmentKey,
-			path: 'oof',
+			device: 'oof',
 			records: [
 				{ts: 100, data: {rab100: 'zab100'}},
 				{ts: 200, data: {rab200: 'zab200'}},
@@ -359,22 +306,22 @@ describe('/records', () => {
 		expect([
 			await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', startTs: '100'},
+					$query: {environmentKey, device: 'foo', startTs: '100'},
 				}),
 			),
 			await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', startTs: '100', take: '1'},
+					$query: {environmentKey, device: 'foo', startTs: '100', take: '1'},
 				}),
 			),
 			await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', startTs: '200'},
+					$query: {environmentKey, device: 'foo', startTs: '200'},
 				}),
 			),
 			await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', startTs: '300'},
+					$query: {environmentKey, device: 'foo', startTs: '300'},
 				}),
 			),
 		]).toEqual([
@@ -392,22 +339,22 @@ describe('/records', () => {
 		expect([
 			await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', endTs: '200'},
+					$query: {environmentKey, device: 'foo', endTs: '200'},
 				}),
 			),
 			await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', endTs: '200', take: '1'},
+					$query: {environmentKey, device: 'foo', endTs: '200', take: '1'},
 				}),
 			),
 			await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', endTs: '100'},
+					$query: {environmentKey, device: 'foo', endTs: '100'},
 				}),
 			),
 			await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', endTs: '000'},
+					$query: {environmentKey, device: 'foo', endTs: '000'},
 				}),
 			),
 		]).toEqual([
@@ -425,14 +372,14 @@ describe('/records', () => {
 		expect([
 			await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', startTs: '100', endTs: '200'},
+					$query: {environmentKey, device: 'foo', startTs: '100', endTs: '200'},
 				}),
 			),
 			await catchError(
 				testNode.records.get({
 					$query: {
 						environmentKey,
-						path: 'foo',
+						device: 'foo',
 						startTs: '100',
 						endTs: '200',
 						take: '1',
@@ -441,17 +388,17 @@ describe('/records', () => {
 			),
 			await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', startTs: '200', endTs: '200'},
+					$query: {environmentKey, device: 'foo', startTs: '200', endTs: '200'},
 				}),
 			),
 			await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', startTs: '100', endTs: '100'},
+					$query: {environmentKey, device: 'foo', startTs: '100', endTs: '100'},
 				}),
 			),
 			await catchError(
 				testNode.records.get({
-					$query: {environmentKey, path: 'foo', startTs: '200', endTs: '100'},
+					$query: {environmentKey, device: 'foo', startTs: '200', endTs: '100'},
 				}),
 			),
 		]).toEqual([
