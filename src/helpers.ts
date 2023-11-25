@@ -1,68 +1,41 @@
-import {env} from './env';
 import {prisma} from './prisma';
 
-const SESSION_LENGTH = 6;
-
-/**
- * Generated session will not contain '/' or ':'.
- */
-function generateSession(): string {
-	const chars =
-		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-	return Array.from({length: SESSION_LENGTH})
-		.map(() => chars[Math.floor(Math.random() * chars.length)])
-		.join('');
-}
-
-/**
- * Returns a node instance from a given session, using the current node name.
- * A node instance is 'nodeName:nodeSession' for a session maker, or 'nodeName' otherwise.
- */
-export function toNodeInstance(session: string): string {
-	return `${env.NODE_NAME}:${session}`;
-}
-
-export function joinPath(...parts: string[]): string {
-	return parts.join('/');
-}
-
-export function splitPath(path: string): string[] {
-	return path.split('/');
-}
-
-export async function createSession(environmentKey: string) {
-	return (await prisma.session.create({
-		data: {
-			environmentKey,
-			createdAt: curTimeMicros(),
-			session: generateSession(),
-		},
-		select: {session: true, createdAt: true},
-	})) as {session: string; createdAt: bigint}; // Weird ts error
-}
-
-/// Gets the node instance for the latest session, or creates a new session if
-/// none exists.
-export async function getOrInitCurNodeInstance(
+export async function getSessionTimeRange(
 	environmentKey: string,
-): Promise<string> {
-	if (!env.IS_SESSION_MAKER) {
-		return env.NODE_NAME;
-	}
-
-	const curSession = await prisma.session.findFirst({
-		where: {environmentKey},
-		orderBy: {createdAt: 'desc'},
-		select: {session: true},
+	sessionName: string,
+): Promise<{
+	/** Inclusive */
+	start: number;
+	/** Inclusive */
+	end: number | undefined;
+}> {
+	const session = await prisma.session.findUnique({
+		where: {
+			environmentKey_name: {
+				environmentKey,
+				name: sessionName,
+			},
+		},
+		select: {createdAt: true},
 	});
 
-	if (curSession) {
-		return toNodeInstance(curSession.session);
+	if (!session) {
+		throw new Error('Cannot find session');
 	}
 
-	const newSession = await createSession(environmentKey);
-	return toNodeInstance(newSession.session);
+	const nextSession = await prisma.session.findFirst({
+		where: {
+			environmentKey,
+			createdAt: {gt: session.createdAt},
+		},
+		orderBy: {createdAt: 'asc'},
+		select: {createdAt: true},
+	});
+
+	return {
+		start: Number(session.createdAt),
+		end: nextSession ? Number(nextSession.createdAt) - 1 : undefined,
+	};
 }
 
 export function curTimeMicros(): number {

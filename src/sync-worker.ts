@@ -1,8 +1,6 @@
-import {env} from './env';
 import {curTimeMicros} from './helpers';
 import {maybeParentNode, type ParentNode} from './parent-node';
 import {prisma} from './prisma';
-import {createMessage} from './routes/messages';
 
 const SYNC_RECORDS_DELAY_MS = 100;
 const SYNC_MESSAGES_DELAY_MS = 100;
@@ -87,7 +85,7 @@ export class SyncWorker {
 			select: {
 				receivedAtIndex: true,
 				environmentKey: true,
-				path: true,
+				device: true,
 				ts: true,
 				data: true,
 			},
@@ -105,7 +103,7 @@ export class SyncWorker {
 			const {error} = await this.parentNode.records.batchGlobal.post({
 				records: latestRecords.map((record) => ({
 					environmentKey: record.environmentKey,
-					path: record.path,
+					device: record.device,
 					ts: Number(record.ts),
 					data: record.data,
 				})),
@@ -144,15 +142,15 @@ export class SyncWorker {
 		this.logMessagesUpToDate(messagesUpToDate);
 
 		if (!messagesUpToDate) {
-			// ignore all messages not addressed to this node
-			const pathPrefix = env.NODE_NAME + '/';
-			if (nextMessage.path.startsWith(pathPrefix)) {
-				await createMessage({
+			await prisma.message.create({
+				data: {
 					environmentKey: nextMessage.environmentKey,
-					path: nextMessage.path.slice(pathPrefix.length),
+					device: nextMessage.device,
+					ts: curTimeMicros(),
 					data: nextMessage.data,
-				});
-			}
+				},
+				select: {},
+			});
 
 			this.lastSyncedMessageTs = nextMessage.ts;
 		}

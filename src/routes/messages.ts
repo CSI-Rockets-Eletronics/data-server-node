@@ -1,49 +1,30 @@
 import assert from 'node:assert';
 import {Elysia, t} from 'elysia';
 import {prisma} from '../prisma';
-import {
-	curTimeMicros,
-	getOrInitCurNodeInstance,
-	joinPath,
-	splitPath,
-	toNodeInstance,
-} from '../helpers';
+import {curTimeMicros, getSessionTimeRange} from '../helpers';
 import {schemas} from './schemas';
-
-export async function createMessage(message: {
-	environmentKey: string;
-	path: string;
-	data: any;
-}) {
-	const curNodeInstance = await getOrInitCurNodeInstance(
-		message.environmentKey,
-	);
-	const fullPath = joinPath(curNodeInstance, message.path);
-
-	await prisma.message.create({
-		data: {
-			environmentKey: message.environmentKey,
-			path: fullPath,
-			ts: curTimeMicros(),
-			data: message.data,
-		},
-		select: {ts: true},
-	});
-}
 
 export const messagesRoute = new Elysia({prefix: '/messages'})
 	.post(
 		'',
 		async ({body}) => {
-			await createMessage(body);
+			await prisma.message.create({
+				data: {
+					environmentKey: body.environmentKey,
+					device: body.device,
+					ts: curTimeMicros(),
+					data: body.data,
+				},
+				select: {},
+			});
 		},
 		{
 			detail: {
-				summary: 'Upload a single message from a given environment and path.',
+				summary: 'Upload a single message from a given environment and device.',
 			},
 			body: t.Object({
 				environmentKey: t.String(),
-				path: schemas.pathWithoutNodeInstance,
+				device: t.String(),
 				data: schemas.data,
 			}),
 		},
@@ -56,19 +37,21 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 
 			assert(!Number.isNaN(afterTs), 'afterTs must be a number');
 
-			const curNodeInstance =
-				query.session === undefined
-					? await getOrInitCurNodeInstance(query.environmentKey)
-					: toNodeInstance(query.session);
-
-			const fullPath = joinPath(curNodeInstance, query.path);
-			const matchPrefix = fullPath.endsWith('/') || fullPath.endsWith(':');
+			const sessionTimeRange =
+				query.sessionName === undefined
+					? undefined
+					: await getSessionTimeRange(query.environmentKey, query.sessionName);
 
 			const message = await prisma.message.findFirst({
 				where: {
 					environmentKey: query.environmentKey,
-					path: matchPrefix ? {startsWith: fullPath} : fullPath,
-					ts: {gt: afterTs},
+					device: query.device,
+					AND: [
+						{ts: {gt: afterTs}},
+						sessionTimeRange
+							? {ts: {gte: sessionTimeRange.start, lte: sessionTimeRange.end}}
+							: {},
+					],
 				},
 				orderBy: {ts: 'asc'},
 				select: {ts: true, data: true},
@@ -86,12 +69,12 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 		{
 			detail: {
 				summary:
-					'List the next message from a given environment and path after a given `ts`.',
+					'List the next message from a given environment and device after a given `ts`.',
 			},
 			query: t.Object({
 				environmentKey: t.String(),
-				path: schemas.pathPrefixWithoutNodeInstance,
-				session: t.Optional(
+				device: t.String(),
+				sessionName: t.Optional(
 					t.String({
 						description: 'Defaults to the current session.',
 					}),
@@ -125,20 +108,16 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 					ts: {gt: afterTs},
 				},
 				orderBy: {ts: 'asc'},
-				select: {environmentKey: true, path: true, ts: true, data: true},
+				select: {environmentKey: true, device: true, ts: true, data: true},
 			});
 
 			if (!message) {
 				return 'NONE';
 			}
 
-			const pathWithoutNodeInstance = joinPath(
-				...splitPath(message.path).slice(1),
-			);
-
 			return {
 				environmentKey: message.environmentKey,
-				path: pathWithoutNodeInstance,
+				device: message.device,
 				ts: Number(message.ts),
 				data: message.data,
 			};
@@ -146,7 +125,7 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 		{
 			detail: {
 				summary:
-					'List the next message across all environments, sessions, and paths after a given `ts`.',
+					'List the next message across all environments, sessions, and devices after a given `ts`.',
 			},
 			query: t.Object({
 				afterTs: t.Optional(
@@ -159,7 +138,7 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 			response: t.Union([
 				t.Object({
 					environmentKey: t.String(),
-					path: schemas.pathPrefixWithoutNodeInstance,
+					device: t.String(),
 					ts: schemas.unixMicros,
 					data: schemas.data,
 				}),

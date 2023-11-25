@@ -1,12 +1,7 @@
 import assert from 'node:assert';
 import {Elysia, t} from 'elysia';
 import {prisma} from '../prisma';
-import {
-	curTimeMicros,
-	getOrInitCurNodeInstance,
-	joinPath,
-	toNodeInstance,
-} from '../helpers';
+import {curTimeMicros, getSessionTimeRange} from '../helpers';
 import {maybeSyncWorker} from '../sync-worker';
 import {schemas} from './schemas';
 
@@ -14,17 +9,12 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 	.post(
 		'',
 		async ({body}) => {
-			const curNodeInstance = await getOrInitCurNodeInstance(
-				body.environmentKey,
-			);
-			const fullPath = joinPath(curNodeInstance, body.path);
-
 			// Use createMany to skip duplicates
 			await prisma.record.createMany({
 				data: [
 					{
 						environmentKey: body.environmentKey,
-						path: fullPath,
+						device: body.device,
 						ts: body.ts ?? curTimeMicros(),
 						data: body.data,
 					},
@@ -36,11 +26,11 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 		},
 		{
 			detail: {
-				summary: 'Upload a single record from a given environment and path.',
+				summary: 'Upload a single record from a given environment and device.',
 			},
 			body: t.Object({
 				environmentKey: t.String(),
-				path: schemas.pathWithoutNodeInstance,
+				device: t.String(),
 				ts: t.Optional(
 					t.Integer({
 						description:
@@ -54,15 +44,10 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 	.post(
 		'/batch',
 		async ({body}) => {
-			const curNodeInstance = await getOrInitCurNodeInstance(
-				body.environmentKey,
-			);
-			const fullPath = joinPath(curNodeInstance, body.path);
-
 			await prisma.record.createMany({
 				data: body.records.map((record) => ({
 					environmentKey: body.environmentKey,
-					path: fullPath,
+					device: body.device,
 					ts: record.ts,
 					data: record.data,
 				})),
@@ -74,11 +59,11 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 		{
 			detail: {
 				summary:
-					'Upload multiple records from the same environment and path. If this node is a session maker, uploads to the current session.',
+					'Upload multiple records from the same environment and device.',
 			},
 			body: t.Object({
 				environmentKey: t.String(),
-				path: schemas.pathWithoutNodeInstance,
+				device: t.String(),
 				records: t.Array(
 					t.Object({
 						ts: schemas.unixMicros,
@@ -91,37 +76,13 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 	.post(
 		'/batchGlobal',
 		async ({body}) => {
-			const uniqueEnvironmentKeys = [
-				...new Set(body.records.map((r) => r.environmentKey)),
-			];
-
-			// `environmentKey` -> `curNodeInstance` for that environment
-			const curNodeInstancesMap = new Map(
-				await Promise.all(
-					uniqueEnvironmentKeys.map(
-						async (environmentKey) =>
-							[
-								environmentKey,
-								await getOrInitCurNodeInstance(environmentKey),
-							] as const,
-					),
-				),
-			);
-
 			await prisma.record.createMany({
-				data: body.records.map((record) => {
-					const curNodeInstance = curNodeInstancesMap.get(
-						record.environmentKey,
-					)!;
-					const fullPath = joinPath(curNodeInstance, record.path);
-
-					return {
-						environmentKey: record.environmentKey,
-						path: fullPath,
-						ts: record.ts,
-						data: record.data,
-					};
-				}),
+				data: body.records.map((record) => ({
+					environmentKey: record.environmentKey,
+					device: record.device,
+					ts: record.ts,
+					data: record.data,
+				})),
 				skipDuplicates: true,
 			});
 
@@ -130,13 +91,13 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 		{
 			detail: {
 				summary:
-					'Upload records across multiple environments and paths at once.  If this node is a session maker, uploads to the current session.',
+					'Upload records across multiple environments and devices at once.',
 			},
 			body: t.Object({
 				records: t.Array(
 					t.Object({
 						environmentKey: t.String(),
-						path: schemas.pathWithoutNodeInstance,
+						device: t.String(),
 						ts: schemas.unixMicros,
 						data: schemas.data,
 					}),
@@ -156,19 +117,21 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			assert(!Number.isNaN(endTs), 'endTs must be a number');
 			assert(!Number.isNaN(take), 'take must be a number');
 
-			const curNodeInstance =
-				query.session === undefined
-					? await getOrInitCurNodeInstance(query.environmentKey)
-					: toNodeInstance(query.session);
-
-			const fullPath = joinPath(curNodeInstance, query.path);
-			const matchPrefix = fullPath.endsWith('/') || fullPath.endsWith(':');
+			const sessionTimeRange =
+				query.sessionName === undefined
+					? undefined
+					: await getSessionTimeRange(query.environmentKey, query.sessionName);
 
 			const records = await prisma.record.findMany({
 				where: {
 					environmentKey: query.environmentKey,
-					path: matchPrefix ? {startsWith: fullPath} : fullPath,
-					ts: {gte: startTs, lte: endTs},
+					device: query.device,
+					AND: [
+						{ts: {gte: startTs, lte: endTs}},
+						sessionTimeRange
+							? {ts: {gte: sessionTimeRange.start, lte: sessionTimeRange.end}}
+							: {},
+					],
 				},
 				orderBy: {ts: startTs === undefined ? 'desc' : 'asc'},
 				take,
@@ -184,12 +147,12 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 		},
 		{
 			detail: {
-				summary: 'List records from a given environment and path.',
+				summary: 'List records from a given environment and device.',
 			},
 			query: t.Object({
 				environmentKey: t.String(),
-				path: schemas.pathPrefixWithoutNodeInstance,
-				session: t.Optional(
+				device: t.String(),
+				sessionName: t.Optional(
 					t.String({
 						description: 'Defaults to the current session.',
 					}),
