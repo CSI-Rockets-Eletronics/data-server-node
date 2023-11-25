@@ -16,12 +16,12 @@ describe('/messages', () => {
 			for (let session = 0; session < 5; session++) {
 				await catchError(testNode.sessions.create.post({environmentKey: key}));
 
-				for (let path = 0; path < 5; path++) {
+				for (let device = 0; device < 5; device++) {
 					for (let message = 0; message < 100; message++) {
 						await catchError(
 							testNode.messages.post({
 								environmentKey,
-								path: `foo${path}`,
+								device: `foo${device}`,
 								data: {bar: 'baz'},
 							}),
 						);
@@ -34,7 +34,7 @@ describe('/messages', () => {
 			testNode.messages.next.get({
 				$query: {
 					environmentKey,
-					path: 'foo0',
+					device: 'foo0',
 				},
 			}),
 		)) as Message;
@@ -45,7 +45,7 @@ describe('/messages', () => {
 				testNode.messages.next.get({
 					$query: {
 						environmentKey,
-						path: 'foo0',
+						device: 'foo0',
 						afterTs: message.ts.toString(),
 					},
 				}),
