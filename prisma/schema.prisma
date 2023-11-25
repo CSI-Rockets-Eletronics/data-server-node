@@ -49,8 +49,8 @@ model Message {
   /// current node received the message. Guaranteed that each new message will
   /// have an increasing `ts`, so `ts` can be used for pagination even as new
   /// messages arrive.
-  ts             BigInt @id
+  ts             BigInt @unique
   data           Json
 
-  @@index([environmentKey, device, ts])
+  @@id([environmentKey, device, ts])
 }
