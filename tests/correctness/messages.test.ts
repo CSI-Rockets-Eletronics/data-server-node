@@ -12,34 +12,34 @@ type Message = Exclude<
 describe('/messages', () => {
 	test('upload and get next', async () => {
 		const initial = await catchError(
-			testNode.messages.next.get({$query: {environmentKey, path: 'foo'}}),
+			testNode.messages.next.get({$query: {environmentKey, device: 'foo'}}),
 		);
 		expect(initial).toBe('NONE');
 
 		await catchError(
 			testNode.messages.post({
 				environmentKey,
-				path: 'foo',
+				device: 'foo',
 				data: {bar: 'message1'},
 			}),
 		);
 
 		const message1 = (await catchError(
-			testNode.messages.next.get({$query: {environmentKey, path: 'foo'}}),
+			testNode.messages.next.get({$query: {environmentKey, device: 'foo'}}),
 		)) as Message;
 		expect(message1.data).toEqual({bar: 'message1'});
 
 		await catchError(
 			testNode.messages.post({
 				environmentKey,
-				path: 'foo',
+				device: 'foo',
 				data: {bar: 'message2'},
 			}),
 		);
 
 		// Should still be message1 (earliest)
 		const stillMessage1 = await catchError(
-			testNode.messages.next.get({$query: {environmentKey, path: 'foo'}}),
+			testNode.messages.next.get({$query: {environmentKey, device: 'foo'}}),
 		);
 		expect(stillMessage1).toEqual(message1);
 
@@ -48,7 +48,7 @@ describe('/messages', () => {
 			testNode.messages.next.get({
 				$query: {
 					environmentKey,
-					path: 'foo',
+					device: 'foo',
 					afterTs: message1.ts.toString(),
 				},
 			}),
@@ -62,7 +62,7 @@ describe('/messages', () => {
 				testNode.messages.next.get({
 					$query: {
 						environmentKey,
-						path: 'foo',
+						device: 'foo',
 						afterTs: message2.ts.toString(),
 					},
 				}),
@@ -70,67 +70,24 @@ describe('/messages', () => {
 		).toBe('NONE');
 	});
 
-	test('upload and get next by prefix', async () => {
-		await catchError(
-			testNode.messages.post({
-				environmentKey,
-				path: 'foo',
-				data: 'foo',
-			}),
-		);
-		await catchError(
-			testNode.messages.post({
-				environmentKey,
-				path: 'foo/bar',
-				data: 'foo/bar',
-			}),
-		);
-		await catchError(
-			testNode.messages.post({
-				environmentKey,
-				path: 'foo:bar',
-				data: 'foo:bar',
-			}),
-		);
-
-		expect(
-			await catchError(
-				testNode.messages.next.get({$query: {environmentKey, path: 'foo'}}),
-			),
-		).toEqual({data: 'foo', ts: expect.any(Number)});
-		expect(
-			await catchError(
-				testNode.messages.next.get({$query: {environmentKey, path: 'foo/'}}),
-			),
-		).toEqual({data: 'foo/bar', ts: expect.any(Number)});
-		expect(
-			await catchError(
-				testNode.messages.next.get({$query: {environmentKey, path: 'foo/bar'}}),
-			),
-		).toEqual({data: 'foo/bar', ts: expect.any(Number)});
-		expect(
-			await catchError(
-				testNode.messages.next.get({$query: {environmentKey, path: 'foo:'}}),
-			),
-		).toEqual({data: 'foo:bar', ts: expect.any(Number)});
-		expect(
-			await catchError(
-				testNode.messages.next.get({$query: {environmentKey, path: 'foo:bar'}}),
-			),
-		).toEqual({data: 'foo:bar', ts: expect.any(Number)});
-	});
-
-	test('upload ad get from multiple sessions', async () => {
+	test('upload and get from multiple sessions', async () => {
 		const initialSessions = await catchError(
 			testNode.sessions.get({$query: {environmentKey}}),
 		);
 		expect(initialSessions.sessions).toHaveLength(0);
 
-		// Uploading a message should create a session
+		// Create a new session
+		await catchError(
+			testNode.sessions.create.post({
+				environmentKey,
+			}),
+		);
+
+		// Upload to the first session
 		await catchError(
 			testNode.messages.post({
 				environmentKey,
-				path: 'foo',
+				device: 'foo',
 				data: {bar: 'message1'},
 			}),
 		);
@@ -140,7 +97,7 @@ describe('/messages', () => {
 		);
 		expect(sessionsAfterOne.sessions).toHaveLength(1);
 
-		// Manually create a new session
+		// Create a new session
 		await catchError(
 			testNode.sessions.create.post({
 				environmentKey,
@@ -154,7 +111,7 @@ describe('/messages', () => {
 
 		// Current session should have no messages
 		const curSessionMessage = await catchError(
-			testNode.messages.next.get({$query: {environmentKey, path: 'foo'}}),
+			testNode.messages.next.get({$query: {environmentKey, device: 'foo'}}),
 		);
 		expect(curSessionMessage).toBe('NONE');
 
@@ -164,7 +121,7 @@ describe('/messages', () => {
 		// Also current session
 		const session2Message = await catchError(
 			testNode.messages.next.get({
-				$query: {environmentKey, path: 'foo', session: session2.session},
+				$query: {environmentKey, device: 'foo', sessionName: session2.name},
 			}),
 		);
 		expect(session2Message).toBe('NONE');
@@ -172,7 +129,7 @@ describe('/messages', () => {
 		// First session should have the message
 		const session1Message = (await catchError(
 			testNode.messages.next.get({
-				$query: {environmentKey, path: 'foo', session: session1.session},
+				$query: {environmentKey, device: 'foo', sessionName: session1.name},
 			}),
 		)) as Message;
 		expect(session1Message.data).toEqual({bar: 'message1'});
@@ -181,7 +138,7 @@ describe('/messages', () => {
 		await catchError(
 			testNode.messages.post({
 				environmentKey,
-				path: 'foo',
+				device: 'foo',
 				data: {bar: 'message2'},
 			}),
 		);
@@ -189,7 +146,7 @@ describe('/messages', () => {
 		// Current session should have the message
 		const curSessionMessageAfter = (await catchError(
 			testNode.messages.next.get({
-				$query: {environmentKey, path: 'foo'},
+				$query: {environmentKey, device: 'foo'},
 			}),
 		)) as Message;
 		expect(curSessionMessageAfter.data).toEqual({bar: 'message2'});
@@ -197,7 +154,7 @@ describe('/messages', () => {
 		// Also current session
 		const session2MessageAfter = (await catchError(
 			testNode.messages.next.get({
-				$query: {environmentKey, path: 'foo', session: session2.session},
+				$query: {environmentKey, device: 'foo', sessionName: session2.name},
 			}),
 		)) as Message;
 		expect(session2MessageAfter).toEqual(curSessionMessageAfter);
@@ -205,7 +162,7 @@ describe('/messages', () => {
 		// First session should have only the first message
 		const session1MessageAfter = await catchError(
 			testNode.messages.next.get({
-				$query: {environmentKey, path: 'foo', session: session1.session},
+				$query: {environmentKey, device: 'foo', sessionName: session1.name},
 			}),
 		);
 		expect(session1MessageAfter).toEqual(session1Message);
