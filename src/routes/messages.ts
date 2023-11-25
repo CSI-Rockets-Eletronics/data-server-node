@@ -15,7 +15,7 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 					ts: curTimeMicros(),
 					data: body.data,
 				},
-				select: {},
+				select: {environmentKey: true}, // Can't select nothing
 			});
 		},
 		{

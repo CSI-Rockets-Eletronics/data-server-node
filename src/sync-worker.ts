@@ -149,7 +149,7 @@ export class SyncWorker {
 					ts: curTimeMicros(),
 					data: nextMessage.data,
 				},
-				select: {},
+				select: {environmentKey: true}, // Can't select nothing
 			});
 
 			this.lastSyncedMessageTs = nextMessage.ts;

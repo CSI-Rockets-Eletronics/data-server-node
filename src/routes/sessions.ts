@@ -21,7 +21,7 @@ export const sessionsRoute = new Elysia({prefix: '/sessions'})
 					name,
 					createdAt,
 				},
-				select: {},
+				select: {environmentKey: true}, // Can't select nothing
 			});
 
 			return {name, createdAt};
