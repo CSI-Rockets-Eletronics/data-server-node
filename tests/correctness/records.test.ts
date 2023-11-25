@@ -2,6 +2,7 @@ import {describe, expect, test} from 'bun:test';
 import {testNode} from '../test-node';
 import {catchError} from '../helpers';
 import {environmentKey} from '../setup';
+import {curTimeMicros} from '../../src/helpers';
 
 describe('/records', () => {
 	test('upload and get', async () => {
@@ -179,38 +180,39 @@ describe('/records', () => {
 			);
 			expect(initialSessions.sessions).toHaveLength(0);
 
-			// Uploading a record should create a session
-			await catchError(
-				batchUpload
-					? testNode.records.batch.post({
-							environmentKey,
-							device: 'foo',
-							records: [{ts: 100, data: {bar100: 'baz100'}}],
-					  })
-					: testNode.records.post({
-							environmentKey,
-							device: 'foo',
-							ts: 100,
-							data: {bar100: 'baz100'},
-					  }),
-			);
-
-			const sessionsAfterOne = await catchError(
-				testNode.sessions.get({$query: {environmentKey}}),
-			);
-			expect(sessionsAfterOne.sessions).toHaveLength(1);
-
-			// Manually create a new session
+			// Create a new session
 			await catchError(
 				testNode.sessions.create.post({
 					environmentKey,
 				}),
 			);
 
-			const sessionsAfterTwo = await catchError(
+			// Upload to the first session
+			await catchError(
+				batchUpload
+					? testNode.records.batch.post({
+							environmentKey,
+							device: 'foo',
+							records: [{ts: curTimeMicros(), data: {bar100: 'baz100'}}],
+					  })
+					: testNode.records.post({
+							environmentKey,
+							device: 'foo',
+							data: {bar100: 'baz100'},
+					  }),
+			);
+
+			// Create a new session
+			await catchError(
+				testNode.sessions.create.post({
+					environmentKey,
+				}),
+			);
+
+			const sessions = await catchError(
 				testNode.sessions.get({$query: {environmentKey}}),
 			);
-			expect(sessionsAfterTwo.sessions).toHaveLength(2);
+			expect(sessions.sessions).toHaveLength(2);
 
 			// Current session should have no records
 			const curSessionRecords = await catchError(
@@ -218,8 +220,8 @@ describe('/records', () => {
 			);
 			expect(curSessionRecords.records).toHaveLength(0);
 
-			const session1 = sessionsAfterTwo.sessions[0];
-			const session2 = sessionsAfterTwo.sessions[1];
+			const session1 = sessions.sessions[0];
+			const session2 = sessions.sessions[1];
 
 			// Also current session
 			const session2Records = await catchError(
@@ -243,12 +245,11 @@ describe('/records', () => {
 					? testNode.records.batch.post({
 							environmentKey,
 							device: 'foo',
-							records: [{ts: 200, data: {bar200: 'baz200'}}],
+							records: [{ts: curTimeMicros(), data: {bar200: 'baz200'}}],
 					  })
 					: testNode.records.post({
 							environmentKey,
 							device: 'foo',
-							ts: 200,
 							data: {bar200: 'baz200'},
 					  }),
 			);
@@ -260,7 +261,7 @@ describe('/records', () => {
 				}),
 			);
 			expect(curSessionRecordsAfter.records).toEqual([
-				{ts: 200, data: {bar200: 'baz200'}},
+				{data: {bar200: 'baz200'}, ts: expect.any(Number)},
 			]);
 
 			// Also current session
@@ -280,7 +281,7 @@ describe('/records', () => {
 			);
 			expect(session1RecordsAfter.records).toHaveLength(1);
 			expect(session1RecordsAfter.records).toEqual([
-				{ts: 100, data: {bar100: 'baz100'}},
+				{data: {bar100: 'baz100'}, ts: expect.any(Number)},
 			]);
 		},
 	);
