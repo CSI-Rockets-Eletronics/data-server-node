@@ -28,7 +28,7 @@ describe('/records', () => {
 				for (let device = 0; device < 5; device++) {
 					await catchError(
 						testNode.records.batch.post({
-							environmentKey,
+							environmentKey: key,
 							device: `foo${device}`,
 							records: createManyRecords(),
 						}),

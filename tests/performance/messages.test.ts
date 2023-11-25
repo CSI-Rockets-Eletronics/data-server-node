@@ -20,7 +20,7 @@ describe('/messages', () => {
 					for (let message = 0; message < 100; message++) {
 						await catchError(
 							testNode.messages.post({
-								environmentKey,
+								environmentKey: key,
 								device: `foo${device}`,
 								data: {bar: 'baz'},
 							}),
