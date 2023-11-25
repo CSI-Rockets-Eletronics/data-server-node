@@ -7,28 +7,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// Sessions associated with current node. Only populated if the node is a
-/// session maker.
+/// Sessions associated with current node. The current session is the one with
+/// the latest `createdAt`. Each session spans from its `createdAt` to the next
+/// smallest `createdAt` within the environment.
 model Session {
   environmentKey String
-  /// Unix microseconds, as recorded by the current node. Used to identify the
-  /// current session. Guaranteed that each new session will have an increasing
-  /// `createdAt` (when scoped to an environment).
+  /// Human-readable name
+  name           String
+  /// Unix microseconds, as recorded by the current node. Guaranteed that each
+  /// new session will have an increasing `createdAt` (when scoped to an
+  /// environment).
   createdAt      BigInt
-  session        String
 
-  @@id([environmentKey, createdAt])
+  @@id([environmentKey, name])
+  @@unique([environmentKey, createdAt])
 }
 
 model Record {
   environmentKey String
-  /// Source path, e.g.
-  /// 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'. Always starts
-  /// with the current node instance (name and possibly session), as it is
-  /// prefixed to all incoming records.
-  path           String
-  /// Unix microseconds, as recorded by the device (whose clock *should* be
-  /// roughly synced). Each new message from the same device *should* have an
+  device         String
+  /// Unix microseconds, as recorded by the device (which *should* have a
+  /// real-time clock). Each new message from the same device *should* have an
   /// increasing `ts`, so `ts` can be used for pagination even as new messages
   /// arrive (when scoped to a path).
   ts             BigInt
@@ -39,17 +38,13 @@ model Record {
   /// Metadata for syncing with the parent node.
   receivedAtIndex Int     @default(autoincrement())
 
-  @@id([environmentKey, path, ts])
+  @@id([environmentKey, device, ts])
   @@index([sentToParent, receivedAtIndex])
 }
 
 model Message {
   environmentKey String
-  /// Target path, e.g.
-  /// 'nodeName:nodeSession/nodeName2/deviceName:deviceSession'. Always starts
-  /// with the current node instance (name and possibly session), as it is
-  /// prefixed to all incoming messages.
-  path           String
+  device         String
   /// Unix microseconds, as recorded by the current node. Represents when the
   /// current node received the message. Guaranteed that each new message will
   /// have an increasing `ts`, so `ts` can be used for pagination even as new
@@ -57,5 +52,5 @@ model Message {
   ts             BigInt @id
   data           Json
 
-  @@index([environmentKey, path, ts])
+  @@index([environmentKey, device, ts])
 }
