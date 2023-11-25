@@ -4,16 +4,18 @@ import {curTimeMicros} from '../helpers';
 import {prisma} from '../prisma';
 import {schemas} from './schemas';
 
-function generateSessionName() {
-	return `[${new Date().toISOString()}]`;
+function generateSessionName(createdAtMicros: number) {
+	const milliseconds = Math.floor(createdAtMicros / 1000);
+	const microsOnly = createdAtMicros % 1000;
+	return `[${new Date(milliseconds).toISOString()}::${microsOnly}]`;
 }
 
 export const sessionsRoute = new Elysia({prefix: '/sessions'})
 	.post(
 		'/create',
 		async ({body}) => {
-			const name = body.name ?? generateSessionName();
 			const createdAt = curTimeMicros();
+			const name = body.name ?? generateSessionName(createdAt);
 
 			await prisma.session.create({
 				data: {
