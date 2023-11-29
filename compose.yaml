@@ -8,7 +8,6 @@ services:
       - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/db
       - MOUNT_PATH
       - NODE_NAME
-      - IS_SESSION_MAKER
       - PARENT_NODE_URL
     ports:
       - ${PORT}:3000
