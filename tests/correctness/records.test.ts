@@ -187,13 +187,16 @@ describe('/records', () => {
 				}),
 			);
 
+			// Use timestamp on the server to not have to worry about clock skew
+			const serverTs = await catchError(testNode.ts.get());
+
 			// Upload to the first session
 			await catchError(
 				batchUpload
 					? testNode.records.batch.post({
 							environmentKey,
 							device: 'foo',
-							records: [{ts: curTimeMicros(), data: {bar100: 'baz100'}}],
+							records: [{ts: serverTs, data: {bar100: 'baz100'}}],
 					  })
 					: testNode.records.post({
 							environmentKey,
