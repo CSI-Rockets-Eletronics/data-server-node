@@ -1,4 +1,3 @@
-import assert from 'node:assert';
 import process from 'node:process';
 import {prisma} from './prisma';
 
