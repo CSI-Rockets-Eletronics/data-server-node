@@ -7,10 +7,13 @@ export function ensureSystemClockIsSynchronizedOnLinux(): void {
 		try {
 			const proc = Bun.spawnSync(['timedatectl', 'status']);
 			const output = proc.stdout.toString();
-			assert(
-				output.includes('System clock synchronized: yes'),
-				'⛔️ System clock is not synchronized! Run `timedatectl status` to see why.',
-			);
+			if (output.includes('System clock synchronized: yes')) {
+				console.log('⏰ System clock is synchronized');
+			} else {
+				console.error(
+					'⛔️ System clock is not synchronized! Run `timedatectl status` to see why.',
+				);
+			}
 		} catch {
 			console.warn(
 				'⛔️ Unable to check if system clock is synchronized: timedatectl command not found',
