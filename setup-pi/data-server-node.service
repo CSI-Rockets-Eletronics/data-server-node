@@ -1,0 +1,15 @@
+[Unit]
+Description=Data server
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+User=victator
+WorkingDirectory=/home/victator/data-server-node/
+ExecStart=/bin/bash -c 'PATH=/home/victator/.bun/bin:$PATH exec bun start'
+
+[Install]
+WantedBy=multi-user.target
