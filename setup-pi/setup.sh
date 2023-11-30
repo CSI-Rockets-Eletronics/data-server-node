@@ -1,10 +1,13 @@
 #!/bin/bash
 
+SETUP_FILES_DIR=$(realpath "$(dirname "$0")")
+REPO_DIR=$(realpath "$(dirname "$0")/..")
+
 # Install PostgreSQL
 sudo apt-get install -y postgresql
 
 # Copy pg_hba.conf and postgresql.conf to the PostgreSQL config folder
-cd "$(dirname "$0")"
+cd "$SETUP_FILES_DIR"
 sudo cp pg_hba.conf /etc/postgresql/15/main/
 sudo cp postgresql.conf /etc/postgresql/15/main/
 
@@ -18,12 +21,12 @@ curl -fsSL https://bun.sh/install | bash
 sudo apt-get install -y nodejs
 
 # Install dependencies and generate Prisma client
-cd "$(dirname "$0")/.."
+cd "$REPO_DIR"
 bun install
 bun prisma:generate
 
 # Copy the service file to the systemd services folder
-cd "$(dirname "$0")"
+cd "$SETUP_FILES_DIR"
 sudo cp data-server-node.service /etc/systemd/system/
 
 # Reload systemd daemon to read the new service file
