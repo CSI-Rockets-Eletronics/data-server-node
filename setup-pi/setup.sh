@@ -3,6 +3,9 @@
 SETUP_FILES_DIR=$(realpath "$(dirname "$0")")
 REPO_DIR=$(realpath "$(dirname "$0")/..")
 
+# Update the package list
+sudo apt update
+
 # Install PostgreSQL 15
 sudo apt install -y postgresql-15
 
