@@ -9,7 +9,7 @@ Restart=always
 RestartSec=5
 User=victator
 WorkingDirectory=/home/victator/data-server-node/
-ExecStart=/bin/bash -c 'PATH=/home/victator/.bun/bin:$PATH exec bun start'
+ExecStart=/bin/bash -c 'PATH=/home/victator/.bun/bin:$PATH exec bun start:migrate'
 
 [Install]
 WantedBy=multi-user.target
