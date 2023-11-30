@@ -23,6 +23,9 @@ sudo cp postgresql.conf /etc/postgresql/15/main/
 # Restart PostgreSQL to apply the new config
 sudo systemctl restart postgresql
 
+# Set PostgreSQL password for the postgres user
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'pass';"
+
 # Install bun
 curl -fsSL https://bun.sh/install | bash
 source ~/.bashrc
