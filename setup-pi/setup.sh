@@ -3,8 +3,8 @@
 SETUP_FILES_DIR=$(realpath "$(dirname "$0")")
 REPO_DIR=$(realpath "$(dirname "$0")/..")
 
-# Install PostgreSQL
-sudo apt install -y postgresql
+# Install PostgreSQL 15
+sudo apt install -y postgresql-15
 
 # Copy pg_hba.conf and postgresql.conf to the PostgreSQL config folder
 cd "$SETUP_FILES_DIR"
