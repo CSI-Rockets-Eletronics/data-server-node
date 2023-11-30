@@ -3,6 +3,12 @@
 SETUP_FILES_DIR=$(realpath "$(dirname "$0")")
 REPO_DIR=$(realpath "$(dirname "$0")/..")
 
+# Exit if .env doesn't exist
+if [ ! -f "$REPO_DIR/.env" ]; then
+  echo "Please create a .env file in the root of the repository."
+  exit 1
+fi
+
 # Update the package list
 sudo apt update
 
