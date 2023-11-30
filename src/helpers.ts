@@ -1,4 +1,23 @@
+import assert from 'node:assert';
+import process from 'node:process';
 import {prisma} from './prisma';
+
+export function ensureSystemClockIsSynchronizedOnLinux(): void {
+	if (process.platform === 'linux') {
+		try {
+			const proc = Bun.spawnSync(['timedatectl', 'status']);
+			const output = proc.stdout.toString();
+			assert(
+				output.includes('System clock synchronized: yes'),
+				'⛔️ System clock is not synchronized! Run `timedatectl status` to see why.',
+			);
+		} catch {
+			console.warn(
+				'⛔️ Unable to check if system clock is synchronized: timedatectl command not found',
+			);
+		}
+	}
+}
 
 /**
  * If `sessionName` is undefined, defaults to the current session.
