@@ -33,4 +33,4 @@ sudo systemctl daemon-reload
 sudo systemctl enable data-server-node.service
 
 # Start the service
-sudo systemctl start data-server-node.service
+sudo systemctl restart data-server-node.service
