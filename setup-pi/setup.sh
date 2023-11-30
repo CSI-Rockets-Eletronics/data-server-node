@@ -4,7 +4,7 @@ SETUP_FILES_DIR=$(realpath "$(dirname "$0")")
 REPO_DIR=$(realpath "$(dirname "$0")/..")
 
 # Install PostgreSQL
-sudo apt-get install -y postgresql
+sudo apt install -y postgresql
 
 # Copy pg_hba.conf and postgresql.conf to the PostgreSQL config folder
 cd "$SETUP_FILES_DIR"
@@ -18,7 +18,7 @@ sudo systemctl restart postgresql
 curl -fsSL https://bun.sh/install | bash
 
 # Install Node.js (necessary for Prisma)
-sudo apt-get install -y nodejs
+sudo apt install -y nodejs
 
 # Install dependencies and generate Prisma client
 cd "$REPO_DIR"
