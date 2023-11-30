@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -i
 
 SETUP_FILES_DIR=$(realpath "$(dirname "$0")")
 REPO_DIR=$(realpath "$(dirname "$0")/..")
