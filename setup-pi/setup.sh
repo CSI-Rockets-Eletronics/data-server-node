@@ -19,6 +19,7 @@ sudo systemctl restart postgresql
 
 # Install bun
 curl -fsSL https://bun.sh/install | bash
+source ~/.bashrc
 
 # Install Node.js (necessary for Prisma)
 sudo apt install -y nodejs
