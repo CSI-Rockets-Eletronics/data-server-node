@@ -76,6 +76,14 @@ export async function getSessionTimeRange(
 }
 
 export function curTimeMicros(): number {
+	// On Linux, use the date command (to handle the case where the raspberry pi's
+	// clock is not synchronized until after the server starts)
+	if (process.platform === 'linux') {
+		const proc = Bun.spawnSync(['date', '+%s%6N']);
+		const output = proc.stdout.toString();
+		return Number(output);
+	}
+
 	const milliseconds = performance.now() + performance.timeOrigin;
 	return Math.round(milliseconds * 1000);
 }
