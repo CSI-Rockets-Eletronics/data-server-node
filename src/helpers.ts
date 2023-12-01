@@ -6,8 +6,8 @@ export async function ensureSystemClockIsSynchronizedWithParentNode() {
 	const MAX_DRIFT_MS = 1000; // 1 second
 
 	if (maybeParentNode) {
-		const {data: parentTs} = await maybeParentNode.ts.get();
-		if (parentTs === null) {
+		const {data: parentTs, error} = await maybeParentNode.ts.get();
+		if (error) {
 			console.error(
 				'⛔️ Unable to check if system clock is synchronized: Parent node error',
 			);
