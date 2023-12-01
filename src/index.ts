@@ -6,9 +6,12 @@ import {sessionsRoute} from './routes/sessions';
 import {recordsRoute} from './routes/records';
 import {messagesRoute} from './routes/messages';
 import {schemas} from './routes/schemas';
-import {curTimeMicros, ensureSystemClockIsSynchronizedOnLinux} from './helpers';
+import {
+	curTimeMicros,
+	ensureSystemClockIsSynchronizedWithParentNode,
+} from './helpers';
 
-ensureSystemClockIsSynchronizedOnLinux();
+await ensureSystemClockIsSynchronizedWithParentNode();
 
 const swaggerPath = `${env.MOUNT_PATH}/swagger`;
 

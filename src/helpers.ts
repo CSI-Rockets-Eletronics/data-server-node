@@ -1,23 +1,29 @@
 import process from 'node:process';
 import {prisma} from './prisma';
+import {maybeParentNode} from './parent-node';
 
-export function ensureSystemClockIsSynchronizedOnLinux(): void {
-	if (process.platform === 'linux') {
-		try {
-			const proc = Bun.spawnSync(['timedatectl', 'status']);
-			const output = proc.stdout.toString();
-			if (output.includes('System clock synchronized: yes')) {
-				console.log('⏰ System clock is synchronized');
-			} else {
-				console.error(
-					'⛔️ System clock is not synchronized! Run `timedatectl status` to see why.',
-				);
-			}
-		} catch {
-			console.warn(
-				'⛔️ Unable to check if system clock is synchronized: timedatectl command not found',
+export async function ensureSystemClockIsSynchronizedWithParentNode() {
+	const MAX_DRIFT_MS = 1000; // 1 second
+
+	if (maybeParentNode) {
+		const {data: parentTs} = await maybeParentNode.ts.get();
+		if (parentTs === null) {
+			console.error(
+				'⛔️ Unable to check if system clock is synchronized: Parent node error',
 			);
+			return process.exit(1); // eslint-disable-line unicorn/no-process-exit
 		}
+
+		const driftMs = (curTimeMicros() - parentTs) / 1000;
+
+		if (Math.abs(driftMs) > MAX_DRIFT_MS) {
+			console.error(
+				`⛔️ System clock is not synchronized with parent node! Drift is ${driftMs} ms`,
+			);
+			return process.exit(1); // eslint-disable-line unicorn/no-process-exit
+		}
+
+		console.log(`⏰ System clock is synchronized (drift is ${driftMs} ms)`);
 	}
 }
 
