@@ -6,6 +6,7 @@ REPO_DIR=$(realpath "$(dirname "$0")/..")
 # Exit if .env doesn't exist
 if [ ! -f "$REPO_DIR/.env" ]; then
   echo "Please create a .env file in the root of the repository."
+  echo "Set DATABASE_URL=\"postgresql://postgres@pass:5432/rockets-data?schema=public\""
   exit 1
 fi
 
