@@ -2,7 +2,6 @@ import {describe, expect, test} from 'bun:test';
 import {testNode} from '../test-node';
 import {catchError} from '../helpers';
 import {environmentKey} from '../setup';
-import {curTimeMicros} from '../../src/helpers';
 
 describe('/records', () => {
 	test('upload and get', async () => {
@@ -420,5 +419,60 @@ describe('/records', () => {
 			{records: [{data: {bar100: 'baz100'}, ts: 100}]},
 			{records: []},
 		]);
+	});
+
+	test('get multi device', async () => {
+		await catchError(
+			testNode.records.post({
+				environmentKey,
+				device: 'foo',
+				ts: 100,
+				data: 'foo100',
+			}),
+		);
+		await catchError(
+			testNode.records.post({
+				environmentKey,
+				device: 'foo',
+				ts: 200,
+				data: 'foo200',
+			}),
+		);
+		await catchError(
+			testNode.records.post({
+				environmentKey,
+				device: 'bar',
+				ts: 100,
+				data: 'bar100',
+			}),
+		);
+		await catchError(
+			testNode.records.post({
+				environmentKey,
+				device: 'bar',
+				ts: 200,
+				data: 'bar200',
+			}),
+		);
+		await catchError(
+			testNode.records.post({
+				environmentKey,
+				device: 'baz',
+				ts: 100,
+				data: 'baz100',
+			}),
+		);
+
+		expect(
+			await catchError(
+				testNode.records.multiDevice.get({
+					$query: {environmentKey, devices: 'foo,bar,poo'},
+				}),
+			),
+		).toEqual({
+			foo: {data: 'foo200', ts: 200},
+			bar: {data: 'bar200', ts: 200},
+			poo: null,
+		});
 	});
 });
