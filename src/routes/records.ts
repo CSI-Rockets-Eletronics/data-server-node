@@ -183,4 +183,72 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 				),
 			}),
 		},
+	)
+	.get(
+		'/multiDevice',
+		async ({query}) => {
+			const sessionTimeRange = await getSessionTimeRange(
+				query.environmentKey,
+				query.sessionName,
+			);
+
+			const devices = query.devices.split('\t');
+
+			// eslint-disable-next-line @typescript-eslint/ban-types
+			const records: Record<string, {ts: number; data: unknown} | null> = {};
+
+			await Promise.all(
+				devices.map(async (device) => {
+					const record = await prisma.record.findFirst({
+						where: {
+							environmentKey: query.environmentKey,
+							device,
+							ts: {gte: sessionTimeRange.start, lte: sessionTimeRange.end},
+						},
+						orderBy: {ts: 'desc'},
+						select: {ts: true, data: true},
+					});
+
+					return record
+						? {
+								ts: Number(record.ts),
+								data: record.data,
+						  }
+						: null;
+				}),
+			);
+
+			return records;
+		},
+		{
+			detail: {
+				summary:
+					'List the latest record from each of the given devices in a given environment.',
+			},
+			query: t.Object({
+				environmentKey: t.String(),
+				devices: t.String({
+					description: 'A tab-separated list of devices to poll.',
+				}),
+				sessionName: t.Optional(
+					t.String({
+						description: 'Defaults to the current session.',
+					}),
+				),
+			}),
+			response: t.Record(
+				t.String(),
+				t.Union([
+					t.Object({
+						ts: schemas.unixMicros,
+						data: schemas.data,
+					}),
+					t.Null(),
+				]),
+				{
+					description:
+						'Returns a record with a key for each device. Each value will either be an object with `ts` and `data` fields, or `null` if no record exists for that device.',
+				},
+			),
+		},
 	);
