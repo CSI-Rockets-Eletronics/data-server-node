@@ -192,7 +192,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 				query.sessionName,
 			);
 
-			const devices = query.devices.split('\t');
+			const devices = query.devices.split(',');
 
 			// eslint-disable-next-line @typescript-eslint/ban-types
 			const records: Record<string, {ts: number; data: unknown} | null> = {};
@@ -209,7 +209,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 						select: {ts: true, data: true},
 					});
 
-					return record
+					records[device] = record
 						? {
 								ts: Number(record.ts),
 								data: record.data,
@@ -228,7 +228,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			query: t.Object({
 				environmentKey: t.String(),
 				devices: t.String({
-					description: 'A tab-separated list of devices to poll.',
+					description: 'A comma-separated list of devices to poll.',
 				}),
 				sessionName: t.Optional(
 					t.String({
