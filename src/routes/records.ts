@@ -228,7 +228,8 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 			query: t.Object({
 				environmentKey: t.String(),
 				devices: t.String({
-					description: 'A comma-separated list of devices to poll.',
+					description:
+						'A comma-separated list of devices to poll. Ex: `foo,bar,baz`',
 				}),
 				sessionName: t.Optional(
 					t.String({
