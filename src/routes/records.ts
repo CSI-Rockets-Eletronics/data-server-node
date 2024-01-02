@@ -187,6 +187,9 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 	.get(
 		'/multiDevice',
 		async ({query}) => {
+			const endTs = query.endTs === undefined ? undefined : Number(query.endTs);
+			assert(!Number.isNaN(endTs), 'endTs must be a number');
+
 			const sessionTimeRange = await getSessionTimeRange(
 				query.environmentKey,
 				query.sessionName,
@@ -203,7 +206,10 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 						where: {
 							environmentKey: query.environmentKey,
 							device,
-							ts: {gte: sessionTimeRange.start, lte: sessionTimeRange.end},
+							AND: [
+								{ts: {lte: endTs}},
+								{ts: {gte: sessionTimeRange.start, lte: sessionTimeRange.end}},
+							],
 						},
 						orderBy: {ts: 'desc'},
 						select: {ts: true, data: true},
@@ -234,6 +240,12 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 				sessionName: t.Optional(
 					t.String({
 						description: 'Defaults to the current session.',
+					}),
+				),
+				endTs: t.Optional(
+					t.String({
+						description:
+							'Unix microseconds, inclusive (subtract 1 to get records before a known record). Defaults to the end of time.',
 					}),
 				),
 			}),
