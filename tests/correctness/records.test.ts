@@ -474,5 +474,17 @@ describe('/records', () => {
 			bar: {data: 'bar200', ts: 200},
 			poo: null,
 		});
+
+		expect(
+			await catchError(
+				testNode.records.multiDevice.get({
+					$query: {environmentKey, devices: 'foo,bar,poo', endTs: '100'},
+				}),
+			),
+		).toEqual({
+			foo: {data: 'foo100', ts: 100},
+			bar: {data: 'bar100', ts: 100},
+			poo: null,
+		});
 	});
 });
