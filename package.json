@@ -6,6 +6,7 @@
     "start": "bun run src/index.ts",
     "start:migrate": "prisma migrate deploy && bun start",
     "prepare": "husky install || echo 'ignoring failed husky install (no git in Docker)'",
+    "postinstall": "prisma generate",
     "lint": "xo",
     "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
