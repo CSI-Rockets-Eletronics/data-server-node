@@ -5,6 +5,7 @@ import {env} from './env';
 import {sessionsRoute} from './routes/sessions';
 import {recordsRoute} from './routes/records';
 import {messagesRoute} from './routes/messages';
+import {exportRoute} from './routes/export';
 import {schemas} from './routes/schemas';
 import {
 	curTimeMicros,
@@ -53,7 +54,8 @@ const app = new Elysia()
 	)
 	.use(sessionsRoute)
 	.use(recordsRoute)
-	.use(messagesRoute);
+	.use(messagesRoute)
+	.use(exportRoute);
 
 const mountedApp = new Elysia()
 	.use(cors())
