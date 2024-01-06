@@ -7,7 +7,7 @@ import {
 	parseQueryFilterTs,
 } from '../helpers';
 import {maybeSyncWorker} from '../sync-worker';
-import {schemas} from './schemas';
+import {queryFilterTsDesc, schemas} from './schemas';
 
 export const recordsRoute = new Elysia({prefix: '/records'})
 	.post(
@@ -156,14 +156,12 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 				),
 				startTs: t.Optional(
 					t.String({
-						description:
-							'Unix microseconds, inclusive (add 1 to get records after a known record). Defaults to the start of time.',
+						description: `${queryFilterTsDesc} Inclusive (add 1 to get records after a known record). Defaults to the start of time.`,
 					}),
 				),
 				endTs: t.Optional(
 					t.String({
-						description:
-							'Unix microseconds, inclusive (subtract 1 to get records before a known record). Defaults to the end of time.',
+						description: `${queryFilterTsDesc} Inclusive (subtract 1 to get records before a known record). Defaults to the end of time.`,
 					}),
 				),
 				take: t.Optional(
@@ -242,8 +240,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 				),
 				endTs: t.Optional(
 					t.String({
-						description:
-							'Unix microseconds, inclusive (subtract 1 to get records before a known record). Defaults to the end of time.',
+						description: `${queryFilterTsDesc} Inclusive (subtract 1 to get records before a known record). Defaults to the end of time.`,
 					}),
 				),
 			}),

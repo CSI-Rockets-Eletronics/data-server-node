@@ -3,6 +3,7 @@ import {Elysia, t} from 'elysia';
 import {Prisma} from '@prisma/client';
 import {getSessionTimeRange, parseQueryFilterTs} from '../helpers';
 import {prisma} from '../prisma';
+import {queryFilterTsDesc} from './schemas';
 
 export const exportRoute = new Elysia({prefix: '/export'}).get(
 	'/:environmentKey/:sessionName/:device/records',
@@ -70,14 +71,12 @@ export const exportRoute = new Elysia({prefix: '/export'}).get(
 		query: t.Object({
 			startTs: t.Optional(
 				t.String({
-					description:
-						'Unix microseconds, inclusive (add 1 to get records after a known record). Defaults to the start of time.',
+					description: `${queryFilterTsDesc} Inclusive (add 1 to get records after a known record). Defaults to the start of time.`,
 				}),
 			),
 			endTs: t.Optional(
 				t.String({
-					description:
-						'Unix microseconds, inclusive (subtract 1 to get records before a known record). Defaults to the end of time.',
+					description: `${queryFilterTsDesc} Inclusive (subtract 1 to get records before a known record). Defaults to the end of time.`,
 				}),
 			),
 		}),

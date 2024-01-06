@@ -1,7 +1,7 @@
 import {Elysia, t} from 'elysia';
 import {curTimeMicros, parseQueryFilterTs} from '../helpers';
 import {prisma} from '../prisma';
-import {schemas} from './schemas';
+import {queryFilterTsDesc, schemas} from './schemas';
 
 function generateSessionName(createdAtMicros: number) {
 	const milliseconds = Math.floor(createdAtMicros / 1000);
@@ -76,14 +76,12 @@ export const sessionsRoute = new Elysia({prefix: '/sessions'})
 				environmentKey: t.String(),
 				createdAfter: t.Optional(
 					t.String({
-						description:
-							'Unix microseconds, inclusive (add 1 to get sessions after a known session). Defaults to the start of time.',
+						description: `${queryFilterTsDesc} Inclusive (add 1 to get sessions after a known session). Defaults to the start of time.`,
 					}),
 				),
 				createdBefore: t.Optional(
 					t.String({
-						description:
-							'Unix microseconds, inclusive (subtract 1 to get sessions before a known session). Defaults to the end of time.',
+						description: `${queryFilterTsDesc} Inclusive (subtract 1 to get sessions before a known session). Defaults to the end of time.`,
 					}),
 				),
 			}),

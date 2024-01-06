@@ -5,7 +5,7 @@ import {
 	getSessionTimeRange,
 	parseQueryFilterTs,
 } from '../helpers';
-import {schemas} from './schemas';
+import {queryFilterTsDesc, schemas} from './schemas';
 
 export const messagesRoute = new Elysia({prefix: '/messages'})
 	.post(
@@ -79,8 +79,7 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 				),
 				afterTs: t.Optional(
 					t.String({
-						description:
-							'Unix microseconds, exclusive. E.g. the exact `ts` of the last message received. Defaults to the start of time.',
+						description: `${queryFilterTsDesc} Exclusive. E.g. the exact \`ts\` of the last message received. Defaults to the start of time.`,
 					}),
 				),
 			}),
@@ -125,8 +124,7 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 			query: t.Object({
 				afterTs: t.Optional(
 					t.String({
-						description:
-							'Unix microseconds, exclusive. E.g. the exact `ts` of the last message received. Defaults to the start of time.',
+						description: `${queryFilterTsDesc} Exclusive. E.g. the exact \`ts\` of the last message received. Defaults to the start of time.`,
 					}),
 				),
 			}),
