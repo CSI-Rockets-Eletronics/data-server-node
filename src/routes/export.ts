@@ -5,6 +5,12 @@ import {getSessionTimeRange, parseQueryFilterTs} from '../helpers';
 import {prisma} from '../prisma';
 import {queryFilterTsDesc} from './schemas';
 
+function toCsvLine(values: string[]): string {
+	return (
+		values.map((value) => `"${value.replaceAll('"', '""')}"`).join(',') + '\n'
+	);
+}
+
 export const exportRoute = new Elysia({prefix: '/export'}).get(
 	'/:environmentKey/:sessionName/:device/records',
 	async ({params, query, set}) => {
@@ -25,9 +31,9 @@ export const exportRoute = new Elysia({prefix: '/export'}).get(
 			| Prisma.RecordWhereInput['ts']
 			| Prisma.RecordOrderByWithRelationInput['ts'];
 
-		type Record = {ts: string; data: string};
+		type _Record = {ts: string; data: string};
 
-		const records = await prisma.$queryRaw<Record[]>`
+		const records = await prisma.$queryRaw<_Record[]>`
 			select "ts"::text, "data"::text
 			from "Record"
 			where "environmentKey" = ${params.environmentKey}
@@ -47,10 +53,37 @@ export const exportRoute = new Elysia({prefix: '/export'}).get(
 			order by "ts" asc
 			;`;
 
-		let csv = 'ts,data\n'; // Start with header
+		const headers = new Set<string>();
 
-		for (const record of records) {
-			csv += `${record.ts},"${record.data.replaceAll('"', '""')}"\n`;
+		// For performance
+		type RecordWithParsed = _Record & {parsed?: Record<string, unknown>};
+		const recordsWithParsed: RecordWithParsed[] = records;
+
+		for (const record of recordsWithParsed) {
+			record.parsed = JSON.parse(record.data);
+			if (record.parsed === null || record.parsed === undefined) {
+				continue;
+			}
+
+			for (const key of Object.keys(record.parsed)) {
+				headers.add(key);
+			}
+		}
+
+		const headersArray = Array.from(headers);
+
+		// Start with headers
+		let csv = toCsvLine(['ts', ...headersArray]);
+
+		for (const record of recordsWithParsed) {
+			if (record.parsed === null || record.parsed === undefined) {
+				continue;
+			}
+
+			const values = headersArray.map(
+				(header) => JSON.stringify(record.parsed?.[header]) ?? '',
+			);
+			csv += toCsvLine([record.ts, ...values]);
 		}
 
 		set.headers['Content-Type'] = 'text/csv';
