@@ -1,6 +1,5 @@
-import assert from 'node:assert';
 import {Elysia, t} from 'elysia';
-import {curTimeMicros} from '../helpers';
+import {curTimeMicros, parseQueryFilterTs} from '../helpers';
 import {prisma} from '../prisma';
 import {schemas} from './schemas';
 
@@ -50,17 +49,8 @@ export const sessionsRoute = new Elysia({prefix: '/sessions'})
 	.get(
 		'',
 		async ({query}) => {
-			const createdAfter =
-				query.createdAfter === undefined
-					? undefined
-					: Number(query.createdAfter);
-			const createdBefore =
-				query.createdBefore === undefined
-					? undefined
-					: Number(query.createdBefore);
-
-			assert(!Number.isNaN(createdAfter), 'createdAfter must be a number');
-			assert(!Number.isNaN(createdBefore), 'createdBefore must be a number');
+			const createdAfter = parseQueryFilterTs(query.createdAfter);
+			const createdBefore = parseQueryFilterTs(query.createdBefore);
 
 			const sessions = await prisma.session.findMany({
 				where: {

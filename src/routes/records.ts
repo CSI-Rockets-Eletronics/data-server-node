@@ -1,7 +1,11 @@
-import assert from 'node:assert';
 import {Elysia, t} from 'elysia';
 import {prisma} from '../prisma';
-import {curTimeMicros, getSessionTimeRange} from '../helpers';
+import {
+	curTimeMicros,
+	getSessionTimeRange,
+	parseQueryNumber,
+	parseQueryFilterTs,
+} from '../helpers';
 import {maybeSyncWorker} from '../sync-worker';
 import {schemas} from './schemas';
 
@@ -108,14 +112,9 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 	.get(
 		'',
 		async ({query}) => {
-			const startTs =
-				query.startTs === undefined ? undefined : Number(query.startTs);
-			const endTs = query.endTs === undefined ? undefined : Number(query.endTs);
-			const take = query.take === undefined ? undefined : Number(query.take);
-
-			assert(!Number.isNaN(startTs), 'startTs must be a number');
-			assert(!Number.isNaN(endTs), 'endTs must be a number');
-			assert(!Number.isNaN(take), 'take must be a number');
+			const startTs = parseQueryFilterTs(query.startTs);
+			const endTs = parseQueryFilterTs(query.endTs);
+			const take = parseQueryNumber(query.take);
 
 			const sessionTimeRange = await getSessionTimeRange(
 				query.environmentKey,
@@ -187,8 +186,7 @@ export const recordsRoute = new Elysia({prefix: '/records'})
 	.get(
 		'/multiDevice',
 		async ({query}) => {
-			const endTs = query.endTs === undefined ? undefined : Number(query.endTs);
-			assert(!Number.isNaN(endTs), 'endTs must be a number');
+			const endTs = parseQueryFilterTs(query.endTs);
 
 			const sessionTimeRange = await getSessionTimeRange(
 				query.environmentKey,

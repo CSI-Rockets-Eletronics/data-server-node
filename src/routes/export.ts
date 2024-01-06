@@ -1,19 +1,14 @@
 /* eslint-disable @typescript-eslint/no-duplicate-type-constituents */
-import assert from 'node:assert';
 import {Elysia, t} from 'elysia';
 import {Prisma} from '@prisma/client';
-import {getSessionTimeRange} from '../helpers';
+import {getSessionTimeRange, parseQueryFilterTs} from '../helpers';
 import {prisma} from '../prisma';
 
 export const exportRoute = new Elysia({prefix: '/export'}).get(
 	'/:environmentKey/:sessionName/:device/records',
 	async ({params, query, set}) => {
-		const startTs =
-			query.startTs === undefined ? undefined : Number(query.startTs);
-		const endTs = query.endTs === undefined ? undefined : Number(query.endTs);
-
-		assert(!Number.isNaN(startTs), 'startTs must be a number');
-		assert(!Number.isNaN(endTs), 'endTs must be a number');
+		const startTs = parseQueryFilterTs(query.startTs);
+		const endTs = parseQueryFilterTs(query.endTs);
 
 		const sessionTimeRange = await getSessionTimeRange(
 			params.environmentKey,

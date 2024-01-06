@@ -1,7 +1,10 @@
-import assert from 'node:assert';
 import {Elysia, t} from 'elysia';
 import {prisma} from '../prisma';
-import {curTimeMicros, getSessionTimeRange} from '../helpers';
+import {
+	curTimeMicros,
+	getSessionTimeRange,
+	parseQueryFilterTs,
+} from '../helpers';
 import {schemas} from './schemas';
 
 export const messagesRoute = new Elysia({prefix: '/messages'})
@@ -32,10 +35,7 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 	.get(
 		'/next',
 		async ({query}) => {
-			const afterTs =
-				query.afterTs === undefined ? undefined : Number(query.afterTs);
-
-			assert(!Number.isNaN(afterTs), 'afterTs must be a number');
+			const afterTs = parseQueryFilterTs(query.afterTs);
 
 			const sessionTimeRange = await getSessionTimeRange(
 				query.environmentKey,
@@ -96,10 +96,7 @@ export const messagesRoute = new Elysia({prefix: '/messages'})
 	.get(
 		'/nextGlobal',
 		async ({query}) => {
-			const afterTs =
-				query.afterTs === undefined ? undefined : Number(query.afterTs);
-
-			assert(!Number.isNaN(afterTs), 'afterTs must be a number');
+			const afterTs = parseQueryFilterTs(query.afterTs);
 
 			const message = await prisma.message.findFirst({
 				where: {

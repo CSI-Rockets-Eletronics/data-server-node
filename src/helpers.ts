@@ -1,3 +1,4 @@
+import assert from 'node:assert';
 import process from 'node:process';
 import {prisma} from './prisma';
 import {maybeParentNode} from './parent-node';
@@ -84,4 +85,29 @@ export async function getSessionTimeRange(
 export function curTimeMicros(): number {
 	const milliseconds = performance.now() + performance.timeOrigin;
 	return Math.round(milliseconds * 1000);
+}
+
+export function parseQueryNumber(
+	value: string | undefined,
+): number | undefined {
+	if (value === undefined) {
+		return undefined;
+	}
+
+	const numberValue = Number(value);
+	assert(!Number.isNaN(numberValue), 'query param must be a number');
+	return numberValue;
+}
+
+export function parseQueryFilterTs(ts: string | undefined): number | undefined {
+	const numberTs = parseQueryNumber(ts);
+	if (numberTs === undefined) {
+		return undefined;
+	}
+
+	if (numberTs < 0) {
+		return curTimeMicros() - numberTs;
+	}
+
+	return numberTs;
 }
