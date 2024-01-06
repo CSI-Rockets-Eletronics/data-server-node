@@ -106,7 +106,8 @@ export function parseQueryFilterTs(ts: string | undefined): number | undefined {
 	}
 
 	if (numberTs < 0) {
-		return curTimeMicros() - numberTs;
+		// Yes, adding the negative numberTs is correct
+		return curTimeMicros() + numberTs;
 	}
 
 	return numberTs;
