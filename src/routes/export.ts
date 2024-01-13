@@ -14,12 +14,16 @@ function toCsvLine(values: string[]): string {
 export const exportRoute = new Elysia({prefix: '/export'}).get(
 	'/:environmentKey/:sessionName/:device/records',
 	async ({params, query, set}) => {
+		const environmentKey = decodeURIComponent(params.environmentKey);
+		const sessionName = decodeURIComponent(params.sessionName);
+		const device = decodeURIComponent(params.device);
+
 		const startTs = parseQueryFilterTs(query.startTs);
 		const endTs = parseQueryFilterTs(query.endTs);
 
 		const sessionTimeRange = await getSessionTimeRange(
-			params.environmentKey,
-			params.sessionName === 'latest' ? undefined : params.sessionName,
+			environmentKey,
+			sessionName === 'latest' ? undefined : sessionName,
 		);
 
 		// @ts-expect-error - unused type; guard $queryRaw against schema changes
@@ -36,8 +40,8 @@ export const exportRoute = new Elysia({prefix: '/export'}).get(
 		const records = await prisma.$queryRaw<_Record[]>`
 			select "ts"::text, "data"::text
 			from "Record"
-			where "environmentKey" = ${params.environmentKey}
-				and "device" = ${params.device}
+			where "environmentKey" = ${environmentKey}
+				and "device" = ${device}
 				${startTs === undefined ? Prisma.empty : Prisma.sql`and "ts" >= ${startTs}`}
 				${endTs === undefined ? Prisma.empty : Prisma.sql`and "ts" <= ${endTs}`}
 				${
