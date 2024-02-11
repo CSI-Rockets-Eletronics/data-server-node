@@ -76,18 +76,27 @@ export const exportRoute = new Elysia({prefix: '/export'}).get(
 
 		const headersArray = Array.from(headers);
 
-		// Start with headers
-		let csv = toCsvLine(['ts', ...headersArray]);
+		let csv: string;
 
-		for (const record of recordsWithParsed) {
-			if (record.parsed === null || record.parsed === undefined) {
-				continue;
+		if (headersArray.length > 0) {
+			csv = toCsvLine(['ts', ...headersArray]);
+
+			for (const record of recordsWithParsed) {
+				if (record.parsed === null || record.parsed === undefined) {
+					continue;
+				}
+
+				const values = headersArray.map(
+					(header) => JSON.stringify(record.parsed?.[header]) ?? '',
+				);
+				csv += toCsvLine([record.ts, ...values]);
 			}
+		} else {
+			csv = toCsvLine(['ts', 'data']);
 
-			const values = headersArray.map(
-				(header) => JSON.stringify(record.parsed?.[header]) ?? '',
-			);
-			csv += toCsvLine([record.ts, ...values]);
+			for (const record of records) {
+				csv += toCsvLine([record.ts, record.data]);
+			}
 		}
 
 		set.headers['Content-Type'] = 'text/csv';
