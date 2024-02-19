@@ -12,6 +12,10 @@ const envSchema = z.object({
 		.string()
 		.optional()
 		.transform((value) => (value === '' ? undefined : value)),
+	FORCE_OFFLINE_SYNC: z
+		.string()
+		.optional()
+		.transform((value) => value?.toLowerCase() === 'true'),
 });
 
 export const env = envSchema.parse(process.env);

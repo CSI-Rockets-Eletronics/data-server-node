@@ -1,3 +1,4 @@
+import {env} from './env';
 import {curTimeMicros} from './helpers';
 import {maybeParentNode, type ParentNode} from './parent-node';
 import {prisma} from './prisma';
@@ -157,6 +158,10 @@ export class SyncWorker {
 	}
 
 	private async shouldLiveSyncRecords(): Promise<boolean> {
+		if (env.FORCE_OFFLINE_SYNC) {
+			return false;
+		}
+
 		if (this.latestRecordReceivedAt === undefined) {
 			return false;
 		}
