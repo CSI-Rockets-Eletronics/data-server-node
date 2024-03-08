@@ -12,8 +12,11 @@ import {
 	curTimeMicros,
 	ensureSystemClockIsSynchronizedWithParentNode,
 } from './helpers';
+import {maybeRunSyncWorker} from './sync-worker';
 
 await ensureSystemClockIsSynchronizedWithParentNode();
+
+maybeRunSyncWorker();
 
 const swaggerPath = `${env.MOUNT_PATH}/swagger`;
 

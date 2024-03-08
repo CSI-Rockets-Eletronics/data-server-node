@@ -205,7 +205,11 @@ export const maybeSyncWorker = maybeParentNode
 	? new SyncWorker(maybeParentNode)
 	: undefined;
 
-if (maybeSyncWorker) {
-	void maybeSyncWorker.run();
-	console.log('🔄 Started sync worker');
+export function maybeRunSyncWorker(throwIfNoWorker = false) {
+	if (maybeSyncWorker) {
+		void maybeSyncWorker.run();
+		console.log('🔄 Started sync worker');
+	} else if (throwIfNoWorker) {
+		throw new Error('No parent node configured');
+	}
 }
