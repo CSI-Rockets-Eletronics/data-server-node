@@ -10,7 +10,8 @@
     "lint": "xo",
     "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "run-sync-worker": "bun run src/scripts/run-sync-worker.ts"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "xo --fix",
