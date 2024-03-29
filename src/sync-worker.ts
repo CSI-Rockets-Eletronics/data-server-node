@@ -92,15 +92,10 @@ export class SyncWorker {
 			},
 		});
 
-		const minIndex = latestRecords.at(-1)?.receivedAtIndex;
-		const maxIndex = latestRecords.at(0)?.receivedAtIndex;
-
-		const hasRecords = minIndex !== undefined && maxIndex !== undefined;
-
-		const recordsUpToDate = !hasRecords;
+		const recordsUpToDate = latestRecords.length === 0;
 		this.logRecordsUpToDate(recordsUpToDate);
 
-		if (hasRecords) {
+		if (!recordsUpToDate) {
 			const {error} = await this.parentNode.records.batchGlobal.post({
 				records: latestRecords.map((record) => ({
 					environmentKey: record.environmentKey,
@@ -112,13 +107,15 @@ export class SyncWorker {
 
 			if (error) throw error;
 
+			const receivedAtIndexList = latestRecords.map((r) => r.receivedAtIndex);
+
 			// Set sentToParent to true for all records that were just synced
 			await prisma.record.updateMany({
 				where: {
 					// Could be very many records in range, but the # of un-synced records
 					// is capped by how many records we fetch above
 					sentToParent: false,
-					receivedAtIndex: {gte: minIndex, lte: maxIndex},
+					receivedAtIndex: {in: receivedAtIndexList},
 				},
 				data: {sentToParent: true},
 			});
