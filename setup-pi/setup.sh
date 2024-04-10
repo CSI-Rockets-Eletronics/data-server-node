@@ -1,5 +1,7 @@
 #!/bin/bash -i
 
+set -e
+
 SETUP_FILES_DIR=$(realpath "$(dirname "$0")")
 REPO_DIR=$(realpath "$(dirname "$0")/..")
 
