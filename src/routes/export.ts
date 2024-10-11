@@ -5,6 +5,9 @@ import {getSessionTimeRange, parseQueryFilterTs} from '../helpers';
 import {prisma} from '../prisma';
 import {queryFilterTsDesc} from './schemas';
 
+const LATEST = 'latest';
+const ALL = 'all';
+
 function toCsvLine(values: string[]): string {
 	return (
 		values.map((value) => `"${value.replaceAll('"', '""')}"`).join(',') + '\n'
@@ -21,10 +24,13 @@ export const exportRoute = new Elysia({prefix: '/export'}).get(
 		const startTs = parseQueryFilterTs(query.startTs);
 		const endTs = parseQueryFilterTs(query.endTs);
 
-		const sessionTimeRange = await getSessionTimeRange(
-			environmentKey,
-			sessionName === 'latest' ? undefined : sessionName,
-		);
+		const sessionTimeRange =
+			sessionName === ALL
+				? null
+				: await getSessionTimeRange(
+						environmentKey,
+						sessionName === LATEST ? undefined : sessionName,
+				  );
 
 		// @ts-expect-error - unused type; guard $queryRaw against schema changes
 		type _assertTypesForQueryRaw =
@@ -45,12 +51,12 @@ export const exportRoute = new Elysia({prefix: '/export'}).get(
 				${startTs === undefined ? Prisma.empty : Prisma.sql`and "ts" >= ${startTs}`}
 				${endTs === undefined ? Prisma.empty : Prisma.sql`and "ts" <= ${endTs}`}
 				${
-					sessionTimeRange.start === undefined
+					sessionTimeRange?.start === undefined
 						? Prisma.empty
 						: Prisma.sql`and "ts" >= ${sessionTimeRange.start}`
 				}
 				${
-					sessionTimeRange.end === undefined
+					sessionTimeRange?.end === undefined
 						? Prisma.empty
 						: Prisma.sql`and "ts" <= ${sessionTimeRange.end}`
 				}
@@ -110,7 +116,7 @@ export const exportRoute = new Elysia({prefix: '/export'}).get(
 		params: t.Object({
 			environmentKey: t.String(),
 			sessionName: t.String({
-				description: 'Use `latest` to get the latest session.',
+				description: `Use \`${LATEST}\` to get the latest session, or \`${ALL}\` to get all sessions.`,
 			}),
 			device: t.String(),
 		}),
