@@ -174,7 +174,10 @@ sudo apt-get install screen
 
    ```bash
    screen -r sync-session
+
    ```
+
+6. To terminate the screen session after the sync process is complete, reattach to the session, type `Ctrl + C` to stop the process, and then exit the screen session with the `exit` command.
 
 ### Benefits of Using Screen
 
