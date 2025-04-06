@@ -70,12 +70,16 @@ export const exportRoute = new Elysia({prefix: '/export'}).get(
 		const recordsWithParsed: RecordWithParsed[] = records;
 
 		for (const record of recordsWithParsed) {
-			record.parsed = JSON.parse(record.data);
-			if (record.parsed === null || record.parsed === undefined) {
+			const parsed = JSON.parse(record.data);
+
+			if (parsed === null || parsed === undefined) {
 				continue;
 			}
 
-			for (const key of Object.keys(record.parsed)) {
+			const parsedObject = typeof parsed === 'object' ? parsed : {data: parsed};
+			record.parsed = parsedObject;
+
+			for (const key of Object.keys(parsedObject)) {
 				headers.add(key);
 			}
 		}
