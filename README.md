@@ -122,3 +122,64 @@ sudo journalctl -f -u data-server-node
 ```
 
 - Verify your `.env` file is correctly configured with valid URLs and credentials.
+
+## Running the Sync Command in a Screen Session
+
+Using a screen session to run the sync command is beneficial when you want to ensure that the process continues to run independently of your terminal session. This is particularly useful for long-running tasks or when you need to disconnect from the server without interrupting the process.
+
+### Installing Screen
+
+If you don't have `screen` installed, you can install it using:
+
+```bash
+sudo apt-get update
+sudo apt-get install screen
+```
+
+### Running the Sync Command in a Screen Session
+
+1. Start a new screen session:
+
+   ```bash
+   screen -S sync-session
+   ```
+
+2. Run the sync worker script within the screen session using Bun:
+
+   ```bash
+   bun run src/scripts/run-sync-worker.ts
+   ```
+
+   You should see output similar to:
+
+   ```
+   📡 Using parent node at https://csiwiki.me.columbia.edu/rocketsdata2
+   🔄 Started sync worker
+   ⏳ Records are out of date
+   ```
+
+3. To detach from the screen session (leaving the process running), press:
+
+   ```
+   Ctrl + A, then D
+   ```
+
+4. You can list all the running screen sessions with:
+
+   ```bash
+   screen -ls
+   ```
+
+5. To reattach to the screen session, use:
+
+   ```bash
+   screen -r sync-session
+   ```
+
+### Benefits of Using Screen
+
+- **Persistence**: Allows the sync process to continue running even if you disconnect from the server.
+- **Convenience**: You can start a task, detach, and come back later to check on its progress.
+- **Resource Management**: Frees up your terminal for other tasks while the sync operation continues in the background.
+
+Using screen is a powerful way to manage long-running processes on remote servers, ensuring they remain unaffected by network disruptions or accidental terminal closures.
